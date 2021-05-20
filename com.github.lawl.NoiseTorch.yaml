@@ -1,0 +1,34 @@
+app-id: com.github.lawl.NoiseTorch
+runtime: org.freedesktop.Platform
+runtime-version: '20.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.golang
+command: noisetorch
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --device=dri
+  - --share=network
+  - --socket=pulseaudio
+  - --filesystem=xdg-download
+  - --filesystem=xdg-music
+# Jack
+  - --filesystem=xdg-run/pipewire-0
+  - --system-talk-name=org.freedesktop.RealtimeKit1
+
+modules:
+  #- shared-modules/linux-audio/jack2.json
+
+  - name: NoiseTorch
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/golang/bin
+    build-commands:
+      - make
+    sources:
+      - type: archive
+        url: https://github.com/lawl/NoiseTorch/archive/refs/tags/0.11.2.tar.gz
+        sha256: 01512e90f5f29f81b22b81ed83bdc4df91d2ef86c26a848c4d34a2c3eba260bf
+      - type: file
+        path: com.github.lawl.NoiseTorch.metainfo.xml 
