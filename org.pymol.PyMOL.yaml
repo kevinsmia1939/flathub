@@ -9,7 +9,15 @@ finish-args:
   - --device=dri
 
 modules:
-  - shared-modules/glew/glew.json
+  #- shared-modules/glew/glew.json
+
+  - name: glew
+    buildsystem: cmake
+    subdir: build/cmake
+    sources:
+      - type: archive
+        url: https://downloads.sourceforge.net/project/glew/glew/2.2.0/glew-2.2.0.tgz
+        sha256: d4fc82893cfb00109578d0a1a2337fb8ca335b3ceccf97b97e5cc7f08e4353e1
 
   - name: msgpack
     buildsystem: cmake-ninja
@@ -175,6 +183,15 @@ modules:
         url: https://github.com/g-truc/glm
         tag: 0.9.9.8
         commit: bf71a834948186f4097caa076cd2663c69a10e1e
+
+  - name: VTK-m
+    buildsystem: cmake
+    builddir: true
+    config-opts:
+    sources:
+      - type: archive
+        url: https://gitlab.kitware.com/vtk/vtk-m/-/archive/v1.5.1/vtk-m-v1.5.1.tar.bz2
+        sha256: 1023382a964c16540fe0d622fc8a1d48b2ee893547cf0c7b0ed11aeded077b32
         
   - name: PyMOL
     buildsystem: simple
