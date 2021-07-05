@@ -448,6 +448,7 @@ modules:
     config-opts:
       - -DAV_BUILD_CUDA:BOOL=OFF
       - -DILMBASE_INCLUDE_PATH:PATH=/app/include
+      - -DOPENEXR_ILMIMF_LIBRARY:PATH=/app/lib
     sources:
       - type: git
         url: git://github.com/alicevision/AliceVision.git
