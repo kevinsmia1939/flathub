@@ -1,0 +1,477 @@
+app-id: org.alicevision.Meshroom
+runtime: org.kde.Platform
+sdk: org.kde.Sdk
+runtime-version: '5.15'
+base: io.qt.qtwebengine.BaseApp
+base-version: 5.15
+rename-icon: paraview
+command: paraview
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --device=dri
+  - --share=network
+  - --filesystem=home
+cleanup:
+  #- /include
+  #- /lib/cmake
+  #- /lib/pkgconfig
+  #- /share/doc
+  #- /share/man
+  #- /etc
+  #- *.la
+  #- *.a
+
+# Disable ARM support ParaView does not support it anyway.
+modules:
+  - shared-modules/glew/glew.json
+  - shared-modules/glu/glu-9.json
+
+  - name: freeglut
+    buildsystem: cmake
+    builddir: true
+    #config-opts:
+      #- -DBUILD_TESTING:BOOL=OFF
+    sources:
+      - type: archive
+        url: http://prdownloads.sourceforge.net/freeglut/freeglut-3.2.1.tar.gz
+        sha256: d4000e02102acaf259998c870e25214739d1f16f67f99cb35e4f46841399da68
+        # Patch from openSUSE.
+      - type: patch
+        path: gcc10.patch
+        strip-components: 3
+
+  #- name: python-numpy
+    #buildsystem: simple
+    #build-commands:
+      #- rm pyproject.toml
+      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
+    #sources:
+      #- type: archive
+        #url: https://github.com/numpy/numpy/releases/download/v1.21.0/numpy-1.21.0.tar.gz
+        #sha256: b662c841b29848c04d9134f31dbaa7d4c8e673f45bb3a5f28d02f49c424d558a
+
+  #- name: python-certifi
+    #buildsystem: simple
+    #build-commands:
+      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
+    #sources:
+      #- type: archive
+        #url: https://files.pythonhosted.org/packages/6d/78/f8db8d57f520a54f0b8a438319c342c61c22759d8f9a1cd2e2180b5e5ea9/certifi-2021.5.30.tar.gz
+        #sha256: 2bbf76fd432960138b3ef6dda3dde0544f27cbf8546c458e60baf371917ba9ee
+
+  #- name: qhull
+    #buildsystem: cmake-ninja
+    #sources:
+      #- type: archive
+        #url: http://www.qhull.org/download/qhull-2020-src-8.0.2.tgz
+        #sha256: b5c2d7eb833278881b952c8a52d20179eab87766b00b865000469a45c1838b7e
+
+  #- name: python-matplotlib
+    #buildsystem: simple
+    #build-options:
+      #env:
+        #MPLSETUPCFG: /run/build/python-matplotlib/matplotlib-setup.cfg
+    #build-commands:
+      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
+    #sources:
+      #- type: file
+        #path: matplotlib-setup.cfg
+      #- type: archive
+        #url: https://github.com/matplotlib/matplotlib/archive/refs/tags/v3.4.2.tar.gz
+        #sha256: e5960bcb964ee77d37752f7a1db4568d85e99d8857fbf20289dda2edfa711675
+
+  #- name: python-pyparsing
+    #buildsystem: simple
+    #build-commands:
+      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
+    #sources:
+      #- type: archive
+        #url: https://files.pythonhosted.org/packages/c1/47/dfc9c342c9842bbe0036c7f763d2d6686bcf5eb1808ba3e170afdb282210/pyparsing-2.4.7.tar.gz
+        #sha256: c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1
+
+  #- name: python-cycler
+    #buildsystem: simple
+    #build-commands:
+      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
+    #sources:
+      #- type: archive
+        #url: https://files.pythonhosted.org/packages/c2/4b/137dea450d6e1e3d474e1d873cd1d4f7d3beed7e0dc973b06e8e10d32488/cycler-0.10.0.tar.gz
+        #sha256: cd7b2d1018258d7247a71425e9f26463dfb444d411c39569972f4ce586b0c9d8
+
+  #- name: python-cppy
+    #buildsystem: simple
+    #build-commands:
+      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
+    #sources:
+      #- type: archive
+        #url: https://files.pythonhosted.org/packages/36/64/be592e84c443a70ea5dcfb1c30bfe6f10ba7d8eb05c2264c7ceca8498548/cppy-1.1.0.tar.gz
+        #sha256: 4eda6f1952054a270f32dc11df7c5e24b259a09fddf7bfaa5f33df9fb4a29642
+
+  #- name: python-kiwisolver
+    #buildsystem: simple
+    #build-commands:
+      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
+    #sources:
+      #- type: archive
+        #url: https://files.pythonhosted.org/packages/90/55/399ab9f2e171047d28933ae4b686d9382d17e6c09a01bead4a6f6b5038f4/kiwisolver-1.3.1.tar.gz
+        #sha256: 950a199911a8d94683a6b10321f9345d5a3a8433ec58b217ace979e18f16e248
+
+  #- name: python-setuptools_scm
+    #buildsystem: simple
+    #build-commands:
+      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
+    #sources:
+      #- type: archive
+        #url: https://files.pythonhosted.org/packages/57/38/930b1241372a9f266a7df2b184fb9d4f497c2cef2e016b014f82f541fe7c/setuptools_scm-6.0.1.tar.gz
+        #sha256: d1925a69cb07e9b29416a275b9fadb009a23c148ace905b2fb220649a6c18e92
+
+  #- name: python-dateutil
+    #buildsystem: simple
+    #build-commands:
+      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
+    #sources:
+      #- type: archive
+        #url: https://files.pythonhosted.org/packages/be/ed/5bbc91f03fa4c839c4c7360375da77f9659af5f7086b7a7bdda65771c8e0/python-dateutil-2.8.1.tar.gz
+        #sha256: 73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c
+
+  - name: Boost
+    buildsystem: simple
+    build-commands:
+      - ./bootstrap.sh --prefix=/app
+      - ./b2 -s --prefix=/app cflags=-fPIC -j$(nproc) link=shared install threading=multi
+    sources:
+      - type: archive
+        url: https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2
+        sha256: f0397ba6e982c4450f27bf32a2a83292aba035b827a5623a14636ea583318c41
+
+  #- name: hdf5
+    #buildsystem: cmake-ninja
+    #builddir: true
+    #config-opts:
+      #- -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      #- -DBUILD_TESTING:BOOL=OFF
+      #- -DHDF5_BUILD_EXAMPLES:BOOL=OFF
+      #- -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
+    #sources:
+      #- type: archive
+        #url: https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.tar.bz2
+        #sha256: 68d6ea8843d2a106ec6a7828564c1689c7a85714a35d8efafa2fee20ca366f44
+
+  #- name: netcdf
+    #sources:
+      #- type: archive
+        #url: https://github.com/Unidata/netcdf-c/archive/v4.7.4.tar.gz
+        #sha256: 99930ad7b3c4c1a8e8831fb061cb02b2170fc8e5ccaeda733bd99c3b9d31666b
+
+  #- name: openmpi
+    #sources:
+      #- type: archive
+        #url: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.bz2
+        #sha256: e24f7a778bd11a71ad0c14587a7f5b00e68a71aa5623e2157bafee3d44c07cda
+
+  #- name: GDAL
+    #sources:
+      #- type: archive
+        #url: https://download.osgeo.org/gdal/3.3.0/gdal-3.3.0.tar.gz
+        #sha256: 39fce17f8f421f4f81e3358b9cac21921355a344e20917ac6bd27d483f27e5c9
+    #modules:
+      #- name: PROJ
+        #buildsystem: cmake-ninja
+        #config-opts:
+          #- -DBUILD_TESTING:BOOL=OFF
+        #sources:
+          #- type: archive
+            #url: https://github.com/OSGeo/PROJ/releases/download/8.0.1/proj-8.0.1.tar.gz
+            #sha256: e0463a8068898785ca75dd49a261d3d28b07d0a88f3b657e8e0089e16a0375fa
+
+  #- name: GeoTIFF
+    #builddir: true
+    #buildsystem: simple
+    #build-commands:
+      #- ./configure --prefix=/app
+      #- make install -j
+    #sources:
+      #- type: archive
+        #url: https://download.osgeo.org/geotiff/libgeotiff/libgeotiff-1.6.0.tar.gz
+        #sha256: 9311017e5284cffb86f2c7b7a9df1fb5ebcdc61c30468fb2e6bca36e4272ebca
+
+  #- name: PDAL
+    #buildsystem: cmake
+    #builddir: true
+    #config-opts:
+      #- -DWITH_TESTS=OFF
+    #sources:
+      #- type: archive
+        #url: https://github.com/PDAL/PDAL/releases/download/2.3.0/PDAL-2.3.0-src.tar.bz2
+        #sha256: 63d8d4fee491675f0fa3dca58c26d57fb2afcaa37c24b10f595b3fbff174996e
+
+  #- name: lapack
+    #buildsystem: cmake-ninja
+    #builddir: true
+    #config-opts:
+      #- -DCMAKE_BUILD_TYPE=Release
+      #- -DBUILD_SHARED_LIBS=ON
+      #- -DBUILD_TESTING=OFF
+      #- -DLAPACKE=ON
+      #- -DCBLAS=ON
+    #sources:
+      #- type: archive
+        #url: https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.9.1.tar.gz
+        #sha256: d0085d2caf997ff39299c05d4bacb6f3d27001d25a4cc613d48c1f352b73e7e0
+
+  #- name: Eigen3
+    #buildsystem: cmake-ninja
+    #builddir: true
+    #sources:
+      #- type: archive
+        #url: https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.bz2
+        #sha256: 0fa5cafe78f66d2b501b43016858070d52ba47bd9b1016b0165a7b8e04675677
+    #cleanup:
+      #- *
+
+  - name: Imath
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DBUILD_TESTING:BOOL=OFF
+    sources:
+      - type: git
+        url: git://github.com/AcademySoftwareFoundation/Imath.git
+        tag: v3.0.5
+
+  - name: OpenEXR
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DOPENEXR_INSTALL_EXAMPLES:BOOL=OFF
+    sources:
+      - type: archive
+        url: https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.0.5.tar.gz
+        sha256: 7aa6645da70e9a0cce8215d25030cfd4f4b17b4abf1ceec314f7eae15674e8e4
+
+  - name: libraw
+    buildsystem: simple
+    build-commands:
+      - autoreconf -vfi
+      - ./configure --disable-example --enable-lcms --prefix=/app
+      - make
+      - make install
+    modules:
+      shared-modules/openjpeg/openjpeg.json
+    sources:
+      - type: archive
+        url: https://www.libraw.org/data/LibRaw-0.20.2.tar.gz
+        sha256: dc1b486c2003435733043e4e05273477326e51c3ea554c6864a4eafaff1004a6
+      #- type: archive
+        #url: https://www.libraw.org/data/LibRaw-demosaic-pack-GPL2-0.18.8.tar.gz
+        #sha256: 0b24bcf7bbb5d13fde58bb071f94dc9354be09bc44b2bba0698493065e99f8da
+        #dest: ./LibRaw-demosaic-pack-GPL2
+      #- type: archive
+        #url: https://www.libraw.org/data/LibRaw-demosaic-pack-GPL3-0.18.8.tar.gz
+        #sha256: ffd6916cd66c8101e4e6b589799f256c897748d2fd2486aa34c3705146dbc701
+        #dest: ./LibRaw-demosaic-pack-GPL3
+
+  - name: OpenColorIO
+    buildsystem: cmake # ninja build broken (fixed in 2.0)
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - -DOCIO_BUILD_STATIC=OFF
+      - -DCMAKE_CXX_FLAGS='-Wno-error=deprecated-declarations -Wno-error=unused-function -Wno-error=cast-function-type'
+    build-options:
+      arch:
+        aarch64:
+          config-opts:
+            - -DOCIO_USE_SSE=NO
+    cleanup:
+      - /bin
+    sources:
+      - type: archive
+        url: https://github.com/imageworks/OpenColorIO/archive/v1.1.1.tar.gz
+        sha256: c9b5b9def907e1dafb29e37336b702fff22cc6306d445a13b1621b8a754c14c8
+
+  - name: TBB
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: archive
+        url: https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.3.0.tar.gz
+        sha256: 8f616561603695bbb83871875d2c6051ea28f8187dbe59299961369904d1d49e
+
+  #- name: DCMTK
+    #buildsystem: cmake-ninja
+    #builddir: true
+    #sources:
+      #- type: archive
+        #url: https://dicom.offis.de/download/dcmtk/dcmtk366/dcmtk-3.6.6.tar.gz
+        #sha256: 6859c62b290ee55677093cccfd6029c04186d91cf99c7642ae43627387f3458e
+
+  #- name: Libheif
+    #buildsystem: cmake-ninja
+    #builddir: true
+    #sources:
+      #- type: archive
+        #url: https://github.com/strukturag/libheif/archive/refs/tags/v1.12.0.tar.gz
+        #sha256: 086145b0d990182a033b0011caadb1b642da84f39ab83aa66d005610650b3c65
+
+  #- name: OpenVDB
+    #buildsystem: cmake-ninja
+    #builddir: true
+    #sources:
+      #- type: archive
+        #url: https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v8.1.0.tar.gz
+        #sha256: 3e09d47331429be7409a3a3c27fdd3c297f96d31d2153febe194e664a99d6183
+
+  #- name: Ptex
+    #buildsystem: cmake-ninja
+    #builddir: true
+    #sources:
+      #- type: archive
+        #url: https://github.com/wdas/ptex/archive/refs/tags/v2.4.0.tar.gz
+        #sha256: 690d66b72f34a92488d63134ad1f5736078677356b0004070b0169b9e3240f8e
+
+  - name: fmt
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DFMT_TEST:BOOL=OFF
+    sources:
+      - type: archive
+        url: https://github.com/fmtlib/fmt/archive/refs/tags/8.0.1.tar.gz
+        sha256: b06ca3130158c625848f3fb7418f235155a4d389b2abc3a6245fb01cb0eb1e01
+
+  - name: robin-map
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: archive
+        url: https://github.com/Tessil/robin-map/archive/refs/tags/v0.6.3.tar.gz
+        sha256: e6654c8c2598f63eb0b1d52ff8bdf39cfcc91d81dd5d05274a6dca91241cd72f
+
+  - name: pybind11
+    buildsystem: simple
+    build-commands:
+      - python3 setup.py build
+      - cmake -DPYBIND11_INSTALL=ON -DPYBIND11_TEST=OFF -DCMAKE_INSTALL_INCLUDEDIR:PATH=${FLATPAK_DEST}/include -DCMAKE_INSTALL_LIBDIR:PATH=${FLATPAK_DEST}/lib -DCMAKE_INSTALL_DATAROOTDIR:PATH=${FLATPAK_DEST}/share .
+      - python3 setup.py install --prefix=${FLATPAK_DEST}
+      - cmake --build .
+      - cmake --install .
+    sources:
+      - type: archive
+        url: https://github.com/pybind/pybind11/archive/v2.6.2.tar.gz
+        sha256: 8ff2fff22df038f5cd02cea8af56622bc67f5b64534f1b83b9f133b8366acff2
+
+  - name: OpenImageIO
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DUSE_OPENCV:BOOL=FALSE
+      - -DUSE_OPENSSL:BOOL=FALSE
+      - -DUSE_QT5:BOOL=FALSE
+      - -DUSE_OPENGL:BOOL=TRUE
+      - -DUSE_HEIF:BOOL=TRUE
+      - -DUSE_OPENJPEG:BOOL=TRUE
+      - -DUSE_PYTHON:BOOL=TRUEs
+      - -DUSE_FIELD3D:BOOL=FALSE
+      - -DOIIO_BUILD_TESTS=0
+      - -DOIIO_BUILD_TOOLS=1
+      - -DSTOP_ON_WARNING:BOOL=FALSE
+      - -DUSE_GIF:BOOL=TRUE
+      - -DUSE_FREETYPE:BOOL=TRUE
+      - -DUSE_FFMPEG:BOOL=TRUE
+      - -DLINKSTATIC=0
+      - -DOpenJpeg_ROOT=/app/
+      - -DUSE_LIBRAW:BOOL=TRUE
+      - -DCMAKE_LIBRARY_PATH=/app/lib
+    sources:
+      - type: git
+        url: git://github.com/OpenImageIO/oiio.git
+        tag: v2.2.16.0
+
+  - name: QtOIIO
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_TESTING:BOOL=OFF
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DILMBASE_INCLUDE_PATH:PATH=/app/include
+      - -DOPENEXR_ILMIMF_LIBRARY:PATH=/app/lib
+      - -DOPENEXR_HALF_LIBRARY:PATH=/app/lib
+    sources:
+      - type: git
+        url: https://github.com/alicevision/QtOIIO/
+        tag: master
+
+  - name: Alembic
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DUSE_TESTS:BOOL=OFF
+      - -DUSE_BINARIES:BOOL=OFF
+    sources:
+      - type: archive
+        url: https://github.com/alembic/alembic/archive/refs/tags/1.8.2.tar.gz
+        sha256: 3f1c466ee1600578689b32b1f2587066d3259704ec7ed1fcf80c324d01274f48
+
+  - name: qmlAlembic
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DALEMBIC_ILMBASE_ROOT:PATH=/app
+      - -DILMBASE_ROOT:PATH=/app
+      - -DILMBASE_INCLUDE_DIR:PATH=/app/include
+      - -DALEMBIC_ILMBASE_IMATH_LIB:PATH=/app/lib
+    sources:
+      - type: archive
+        url: https://github.com/alicevision/qmlAlembic/archive/refs/tags/v2021.1.0.tar.gz
+        sha256: e9b535630cfc561f73273f5d25605d94ed30dd4063216b1ca6a8e2692d4c9e00
+      - type: patch
+        path: remove-find-package.patch
+
+  #- name: Meshroom
+    #buildsystem: cmake-ninja
+    #builddir: true
+    #config-opts:
+      #- -DILMBASE_INCLUDE_PATH:PATH=/app/lib
+      #- -DOPENEXR_ILMIMF_LIBRARY:PATH=/app/lib
+      #- -DOPENEXR_HALF_LIBRARY:PATH=/app/lib
+      #- -DImath_DIR:PATH=/app/lib
+      #- -DOpenEXR_DIR:path=/app/lib
+    #sources:
+      #- type: git
+        #url: git://github.com/alicevision/meshroom.git
+        #commit: ad9f1e874af5a6da47d5bb947b018b509925ddf5
+        #tag: v2021.1.0
+
+  - name: AliceVision
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DAV_BUILD_CUDA:BOOL=OFF
+      - -DILMBASE_INCLUDE_PATH:PATH=/app/include
+    sources:
+      - type: git
+        url: git://github.com/alicevision/AliceVision.git
+        tag: v2.4.0
+
+  - name: QtAliceVision
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: archive
+        url: https://github.com/alicevision/QtAliceVision/archive/refs/tags/v2019.2.0.tar.gz
+        sha256: aa04671288d5119d94611fb810c7e2f454dd7722f0adf794e5bd0c5820b74845
+
+  - name: Meshroom
+    buildsystem: simple
+    build-commands:
+      - mkdir -p build
+      - cd build && cmake -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/app ..
+      - touch build/qtOIIO-prefix/src/qtOIIO-stamp/qtOIIO-download
+      - make -C build
+    sources:
+      - type: git
+        url: git://github.com/alicevision/meshroom.git
+        commit: ad9f1e874af5a6da47d5bb947b018b509925ddf5
+        tag: v2021.1.0
+
+
