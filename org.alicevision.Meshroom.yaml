@@ -41,100 +41,6 @@ modules:
         path: gcc10.patch
         strip-components: 3
 
-  #- name: python-numpy
-    #buildsystem: simple
-    #build-commands:
-      #- rm pyproject.toml
-      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
-    #sources:
-      #- type: archive
-        #url: https://github.com/numpy/numpy/releases/download/v1.21.0/numpy-1.21.0.tar.gz
-        #sha256: b662c841b29848c04d9134f31dbaa7d4c8e673f45bb3a5f28d02f49c424d558a
-
-  #- name: python-certifi
-    #buildsystem: simple
-    #build-commands:
-      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
-    #sources:
-      #- type: archive
-        #url: https://files.pythonhosted.org/packages/6d/78/f8db8d57f520a54f0b8a438319c342c61c22759d8f9a1cd2e2180b5e5ea9/certifi-2021.5.30.tar.gz
-        #sha256: 2bbf76fd432960138b3ef6dda3dde0544f27cbf8546c458e60baf371917ba9ee
-
-  #- name: qhull
-    #buildsystem: cmake-ninja
-    #sources:
-      #- type: archive
-        #url: http://www.qhull.org/download/qhull-2020-src-8.0.2.tgz
-        #sha256: b5c2d7eb833278881b952c8a52d20179eab87766b00b865000469a45c1838b7e
-
-  #- name: python-matplotlib
-    #buildsystem: simple
-    #build-options:
-      #env:
-        #MPLSETUPCFG: /run/build/python-matplotlib/matplotlib-setup.cfg
-    #build-commands:
-      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
-    #sources:
-      #- type: file
-        #path: matplotlib-setup.cfg
-      #- type: archive
-        #url: https://github.com/matplotlib/matplotlib/archive/refs/tags/v3.4.2.tar.gz
-        #sha256: e5960bcb964ee77d37752f7a1db4568d85e99d8857fbf20289dda2edfa711675
-
-  #- name: python-pyparsing
-    #buildsystem: simple
-    #build-commands:
-      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
-    #sources:
-      #- type: archive
-        #url: https://files.pythonhosted.org/packages/c1/47/dfc9c342c9842bbe0036c7f763d2d6686bcf5eb1808ba3e170afdb282210/pyparsing-2.4.7.tar.gz
-        #sha256: c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1
-
-  #- name: python-cycler
-    #buildsystem: simple
-    #build-commands:
-      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
-    #sources:
-      #- type: archive
-        #url: https://files.pythonhosted.org/packages/c2/4b/137dea450d6e1e3d474e1d873cd1d4f7d3beed7e0dc973b06e8e10d32488/cycler-0.10.0.tar.gz
-        #sha256: cd7b2d1018258d7247a71425e9f26463dfb444d411c39569972f4ce586b0c9d8
-
-  #- name: python-cppy
-    #buildsystem: simple
-    #build-commands:
-      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
-    #sources:
-      #- type: archive
-        #url: https://files.pythonhosted.org/packages/36/64/be592e84c443a70ea5dcfb1c30bfe6f10ba7d8eb05c2264c7ceca8498548/cppy-1.1.0.tar.gz
-        #sha256: 4eda6f1952054a270f32dc11df7c5e24b259a09fddf7bfaa5f33df9fb4a29642
-
-  #- name: python-kiwisolver
-    #buildsystem: simple
-    #build-commands:
-      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
-    #sources:
-      #- type: archive
-        #url: https://files.pythonhosted.org/packages/90/55/399ab9f2e171047d28933ae4b686d9382d17e6c09a01bead4a6f6b5038f4/kiwisolver-1.3.1.tar.gz
-        #sha256: 950a199911a8d94683a6b10321f9345d5a3a8433ec58b217ace979e18f16e248
-
-  #- name: python-setuptools_scm
-    #buildsystem: simple
-    #build-commands:
-      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
-    #sources:
-      #- type: archive
-        #url: https://files.pythonhosted.org/packages/57/38/930b1241372a9f266a7df2b184fb9d4f497c2cef2e016b014f82f541fe7c/setuptools_scm-6.0.1.tar.gz
-        #sha256: d1925a69cb07e9b29416a275b9fadb009a23c148ace905b2fb220649a6c18e92
-
-  #- name: python-dateutil
-    #buildsystem: simple
-    #build-commands:
-      #- python3 setup.py install --prefix=$FLATPAK_DEST --root=/ --optimize=1
-    #sources:
-      #- type: archive
-        #url: https://files.pythonhosted.org/packages/be/ed/5bbc91f03fa4c839c4c7360375da77f9659af5f7086b7a7bdda65771c8e0/python-dateutil-2.8.1.tar.gz
-        #sha256: 73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c
-
   - name: Boost
     buildsystem: simple
     build-commands:
@@ -145,90 +51,84 @@ modules:
         url: https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2
         sha256: f0397ba6e982c4450f27bf32a2a83292aba035b827a5623a14636ea583318c41
 
-  #- name: hdf5
-    #buildsystem: cmake-ninja
-    #builddir: true
-    #config-opts:
-      #- -DCMAKE_BUILD_TYPE=RelWithDebInfo
-      #- -DBUILD_TESTING:BOOL=OFF
-      #- -DHDF5_BUILD_EXAMPLES:BOOL=OFF
-      #- -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
-    #sources:
-      #- type: archive
-        #url: https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.tar.bz2
-        #sha256: 68d6ea8843d2a106ec6a7828564c1689c7a85714a35d8efafa2fee20ca366f44
+  - name: TBB
+    buildsystem: simple
+    build-commands:
+      - make -j $FLATPAK_BUILDER_N_JOBS
+      - install -d /app/lib
+      - install -m755 build/linux_*/*.so* /app/lib
+      - install -d /app/include
+      - cp -a include/tbb /app/include
+    sources:
+      - type: archive
+        url: https://github.com/oneapi-src/oneTBB/archive/refs/tags/2020_U3.tar.gz
+        sha256: 2103cc6238c935664f87680618f6684d57501d4a2fa8ea8f6c97ad6ff7dc722a
 
-  #- name: netcdf
-    #sources:
-      #- type: archive
-        #url: https://github.com/Unidata/netcdf-c/archive/v4.7.4.tar.gz
-        #sha256: 99930ad7b3c4c1a8e8831fb061cb02b2170fc8e5ccaeda733bd99c3b9d31666b
+  - name: openblas
+    no-autogen: true
+    make-args:
+      - DYNAMIC_ARCH=1
+      - DYNAMIC_OLDER=1
+      - FC=gfortran
+      - NO_CBLAS=1
+      - NO_LAPACKE=1
+      - TARGET=GENERIC
+      - USE_OPENMP=1
+    make-install-args:
+      - PREFIX=/app
+    sources:
+      - type: archive
+        url: https://github.com/xianyi/OpenBLAS/archive/v0.3.15.tar.gz
+        sha256: 30a99dec977594b387a17f49904523e6bc8dd88bd247266e83485803759e4bbe
 
-  #- name: openmpi
-    #sources:
-      #- type: archive
-        #url: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.bz2
-        #sha256: e24f7a778bd11a71ad0c14587a7f5b00e68a71aa5623e2157bafee3d44c07cda
+  - name: Eigen3
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: archive
+        url: https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.bz2
+        sha256: 0fa5cafe78f66d2b501b43016858070d52ba47bd9b1016b0165a7b8e04675677
+    cleanup:
+      - "*"
 
-  #- name: GDAL
-    #sources:
-      #- type: archive
-        #url: https://download.osgeo.org/gdal/3.3.0/gdal-3.3.0.tar.gz
-        #sha256: 39fce17f8f421f4f81e3358b9cac21921355a344e20917ac6bd27d483f27e5c9
-    #modules:
-      #- name: PROJ
-        #buildsystem: cmake-ninja
-        #config-opts:
-          #- -DBUILD_TESTING:BOOL=OFF
-        #sources:
-          #- type: archive
-            #url: https://github.com/OSGeo/PROJ/releases/download/8.0.1/proj-8.0.1.tar.gz
-            #sha256: e0463a8068898785ca75dd49a261d3d28b07d0a88f3b657e8e0089e16a0375fa
+  - name: MPFR
+    config-opts:
+      - --disable-static
+    sources:
+      - type: archive
+        url: https://ftp.gnu.org/gnu/mpfr/mpfr-4.1.0.tar.xz
+        sha256: 0c98a3f1732ff6ca4ea690552079da9c597872d30e96ec28414ee23c95558a7f
 
-  #- name: GeoTIFF
-    #builddir: true
-    #buildsystem: simple
-    #build-commands:
-      #- ./configure --prefix=/app
-      #- make install -j
-    #sources:
-      #- type: archive
-        #url: https://download.osgeo.org/geotiff/libgeotiff/libgeotiff-1.6.0.tar.gz
-        #sha256: 9311017e5284cffb86f2c7b7a9df1fb5ebcdc61c30468fb2e6bca36e4272ebca
+  - name: suitesparse
+    make-args:
+      - BLAS=-lopenblas
+      - LAPACK=
+      - library
+    make-install-args:
+      - BLAS=-lopenblas
+      - LAPACK=
+      - INSTALL_INCLUDE=/app/include/suitesparse
+      - INSTALL_LIB=/app/lib
+      - library
+    no-autogen: true
+    sources:
+      - type: archive
+        url: https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/v5.10.1.tar.gz
+        sha256: acb4d1045f48a237e70294b950153e48dce5b5f9ca8190e86c2b8c54ce00a7ee
 
-  #- name: PDAL
-    #buildsystem: cmake
-    #builddir: true
-    #config-opts:
-      #- -DWITH_TESTS=OFF
-    #sources:
-      #- type: archive
-        #url: https://github.com/PDAL/PDAL/releases/download/2.3.0/PDAL-2.3.0-src.tar.bz2
-        #sha256: 63d8d4fee491675f0fa3dca58c26d57fb2afcaa37c24b10f595b3fbff174996e
-
-  #- name: lapack
-    #buildsystem: cmake-ninja
-    #builddir: true
-    #config-opts:
-      #- -DCMAKE_BUILD_TYPE=Release
-      #- -DBUILD_SHARED_LIBS=ON
-      #- -DBUILD_TESTING=OFF
-      #- -DLAPACKE=ON
-      #- -DCBLAS=ON
-    #sources:
-      #- type: archive
-        #url: https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.9.1.tar.gz
-        #sha256: d0085d2caf997ff39299c05d4bacb6f3d27001d25a4cc613d48c1f352b73e7e0
-
-  #- name: Eigen3
-    #buildsystem: cmake-ninja
-    #builddir: true
-    #sources:
-      #- type: archive
-        #url: https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.bz2
-        #sha256: 0fa5cafe78f66d2b501b43016858070d52ba47bd9b1016b0165a7b8e04675677
-    #cleanup:
-      #- *
+  - name: Ceres-Solver
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DBUILD_TESTING:BOOL=OFF
+      - -DBUILD_EXAMPLES:BOOL=OFF
+      - -DBUILD_BENCHMARKS:BOOL=OFF
+      - -DGFLAGS:BOOL=OFF
+      - -DMINIGLOG:BOOL=ON
+    sources:
+      - type: archive
+        url: https://github.com/ceres-solver/ceres-solver/archive/refs/tags/2.0.0.tar.gz
+        sha256: 2ab0348e0f65fdf43bebcd325a1c73f7e8999691ee75e2a2981281931c42e9fa
 
   - name: Imath
     buildsystem: cmake-ninja
@@ -290,14 +190,6 @@ modules:
       - type: archive
         url: https://github.com/imageworks/OpenColorIO/archive/v1.1.1.tar.gz
         sha256: c9b5b9def907e1dafb29e37336b702fff22cc6306d445a13b1621b8a754c14c8
-
-  - name: TBB
-    buildsystem: cmake-ninja
-    builddir: true
-    sources:
-      - type: archive
-        url: https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.3.0.tar.gz
-        sha256: 8f616561603695bbb83871875d2c6051ea28f8187dbe59299961369904d1d49e
 
   #- name: DCMTK
     #buildsystem: cmake-ninja
@@ -427,20 +319,53 @@ modules:
       - type: patch
         path: remove-find-package.patch
 
-  #- name: Meshroom
-    #buildsystem: cmake-ninja
-    #builddir: true
-    #config-opts:
-      #- -DILMBASE_INCLUDE_PATH:PATH=/app/lib
-      #- -DOPENEXR_ILMIMF_LIBRARY:PATH=/app/lib
-      #- -DOPENEXR_HALF_LIBRARY:PATH=/app/lib
-      #- -DImath_DIR:PATH=/app/lib
-      #- -DOpenEXR_DIR:path=/app/lib
-    #sources:
-      #- type: git
-        #url: git://github.com/alicevision/meshroom.git
-        #commit: ad9f1e874af5a6da47d5bb947b018b509925ddf5
-        #tag: v2021.1.0
+  - name: OpenGV
+    buildsystem: cmake-ninja
+    builddir: true
+    build-options:
+      env:
+        LIBRARY_PATH: "/app/lib:/usr/lib"
+        LD_LIBRARY_PATH: "/app/lib:/usr/lib"
+    config-opts:
+      - -DBUILD_SHARED_LIBS:BOOL=ON
+      - -DBUILD_PYTHON:BOOL=OFF
+      - -DBUILD_TESTS:BOOL=OFF
+      - -DCMAKE_INSTALL_PREFIX:PATH=/app
+    sources:
+      - type: git
+        url: git://github.com/laurentkneip/opengv.git
+        tag: master
+
+  - shared-modules/glu/glu-9.json
+
+  - name: Geogram
+    buildsystem: cmake-ninja
+    builddir: true
+    build-options:
+      env:
+        LIBRARY_PATH: "/app/lib:/usr/lib"
+        LD_LIBRARY_PATH: "/app/lib:/usr/lib"
+    config-opts:
+      - -DGEOGRAM_LIB_ONLY:BOOL=OFF
+      - -DVORPALINE_PLATFORM:STRING=Linux64-gcc-dynamic
+      - -DGEOGRAM_USE_SYSTEM_GLFW3:BOOL=ON
+      - -DCMAKE_EXE_LINKER_FLAGS="-pie"
+      - -DCMAKE_BUILD_TYPE:STRING=Release
+    sources:
+      - type: archive
+        url: https://gforge.inria.fr/frs/download.php/file/38361/geogram_1.7.6.tar.gz
+        sha256: 4456d65baa014e9eb0352675f76eca260ed97eb386d23bc5c13af419dc2e8142
+
+  - name: PopSift
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+    sources:
+      - type: archive
+        url: https://github.com/alicevision/popsift/archive/refs/tags/v0.9.tar.gz
+        sha256: a2a0edf9acb3bd9c0164aafc4360c4996bc0d40dbc903772b4a8bc7bbd994510
+
+#UncertaintyTE
 
   - name: AliceVision
     buildsystem: cmake-ninja
@@ -449,6 +374,7 @@ modules:
       - -DAV_BUILD_CUDA:BOOL=OFF
       - -DILMBASE_INCLUDE_PATH:PATH=/app/include
       - -DOPENEXR_ILMIMF_LIBRARY:PATH=/app/lib
+      - -DOPENEXR_HALF_LIBRARY:PATH=/app/lib
     sources:
       - type: git
         url: git://github.com/alicevision/AliceVision.git
