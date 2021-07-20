@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -40,6 +40,6 @@ include_directories(
+ add_subdirectory(doc)
+ add_subdirectory(data)
+ add_subdirectory(include)
+-add_subdirectory(tests)
++#add_subdirectory(tests)
+ 
+ # enable_coverage_report(posix_process_test linux_process_test)

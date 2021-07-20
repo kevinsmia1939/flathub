@@ -1,0 +1,144 @@
+app-id: io.anbox.Anbox
+runtime: org.kde.Platform
+sdk: org.kde.Sdk
+runtime-version: '5.15'
+command: anbox
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --filesystem=home
+cleanup:
+  #- "/bin/cgal*"
+  #- "/include"
+  #- "/lib/cmake"
+  #- "/lib64/cmake"
+  #- "/lib/pkgconfig"
+  - "/share/doc"
+  - "/share/man"
+  - "*.la"
+  - "*.a"
+
+modules:
+  #- shared-modules/glew/glew.json
+  #- shared-modules/glu/glu-9.json
+  - shared-modules/dbus-glib/dbus-glib-0.110.json
+  - shared-modules/SDL/SDL-1.2.15.json
+
+  - name: Boost
+    buildsystem: simple
+    build-commands:
+      - ./bootstrap.sh --prefix=/app
+      - ./b2 install --build-type=complete link=shared --layout=versioned runtime-link=shared cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $FLATPAK_BUILDER_N_JOBS
+    sources:
+      - type: archive
+        url: https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2
+        sha256: f0397ba6e982c4450f27bf32a2a83292aba035b827a5623a14636ea583318c41
+
+  - name: Protobuf
+    buildsystem: cmake-ninja
+    subdir: cmake
+    config-opts:
+      - -Dprotobuf_BUILD_TESTS:BOOL=OFF
+      - -Dprotobuf_BUILD_EXAMPLES:BOOL=OFF
+    build-options:
+      cflags: '-fPIC'
+      ldflags: '-fPIC'
+      cxxflags: '-fPIC'
+    sources:
+      - type: archive
+        url: https://github.com/protocolbuffers/protobuf/releases/download/v3.15.6/protobuf-cpp-3.15.6.tar.gz
+        sha256: bbdfb7455431d7d58666e8a2996d14b236718ff238eecde10646581e4c87f168
+
+  - name: GoogleTest
+    buildsystem: cmake
+    sources:
+      - type: git
+        url: git://github.com/google/googletest.git
+        tag: release-1.11.0
+        commit: e2239ee6043f73722e7aa812a459f54a28552929
+
+  - name: libcap
+    buildsystem: simple
+    build-commands:
+      - make RAISE_SETFCAP=no prefix=/app lib=lib SHARED=yes LIBDIR=/app/lib SBINDIR=/app/sbin PKGCONFIGDIR=/app/lib/pkgconfig/ INCDIR=/app/include MANDIR=/app/share/man
+    sources:
+      - type: archive
+        url: https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.51.tar.xz
+        sha256: 6609f3ab7aebcc8f9277f53a577c657d9f3056d1352ea623da7fd7c0f00890f9
+
+  - name: libexpat
+    sources:
+      - type: archive
+        url: https://github.com/libexpat/libexpat/releases/download/R_2_4_1/expat-2.4.1.tar.xz
+        sha256: cf032d0dba9b928636548e32b327a2d66b1aab63c4f4a13dd132c2d1d2f2fb6a
+
+  - name: glm
+    buildsystem: simple
+    build-commands:
+      - cp -r glm /app/include
+    sources:
+      - type: git
+        url: https://github.com/g-truc/glm
+        tag: 0.9.9.8
+        commit: bf71a834948186f4097caa076cd2663c69a10e1e
+
+  - name: lxc
+    config-opts:
+      - --disable-static
+      - --disable-examples
+    sources:
+      - type: archive
+        url: https://linuxcontainers.org/downloads/lxc/lxc-4.0.9.tar.gz
+        sha256: 1fcf0610e9140eceb4be2334eb537bb9c5a213faea77c793ab3c62b86f37e52b
+
+  - name: lcov
+    buildsystem: simple
+    build-commands:
+      - make install PREFIX=/app
+    sources:
+      - type: archive
+        url: https://github.com/linux-test-project/lcov/releases/download/v1.15/lcov-1.15.tar.gz
+        sha256: c1cda2fa33bec9aa2c2c73c87226cfe97de0831887176b45ee523c5e30f8053a
+
+  - name: properties-cpp
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: git://github.com/lib-cpp/properties-cpp.git
+        tag: master
+        commit: 45863e849b39c4921d6553e6d27e267a96ac7d77
+      - type: patch
+        path: properties-cpp-disable-tests.patch
+
+  - name: dwarves
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_C_FLAGS=-O2
+    sources:
+      - type: git
+        url: https://git.kernel.org/pub/scm/devel/pahole/pahole.git
+        tag: v1.21
+
+  - name: cpu_features
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: git://github.com/google/cpu_features.git
+        tag: v0.6.0
+        commit: a8397ba4591237c17d18e4acc091f5f3ebe7391e
+
+  - name: Anbox
+    buildsystem: simple
+    build-commands:
+      - truncate -s 0 cmake/FindGMock.cmake
+      - truncate -s 0 tests/CMakeLists.txt
+      - mkdir build
+      - cd build && cmake .. -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_LIBDIR=/app/lib -DCMAKE_INSTALL_PREFIX=/app -DCMAKE_BUILD_TYPE=None -DCMAKE_SKIP_INSTALL_RPATH=YES -DCMAKE_SKIP_RPATH=YES -DBUILD_SHARED_LIBS:BOOL=ON
+      - cd build && make .. && make install
+    sources:
+      - type: git
+        url: git://github.com/anbox/anbox.git
+        tag: master
+        commit: 04ac697c890b96aa70814a29696adee6a2fc7ff8
