@@ -1,0 +1,72 @@
+app-id: br.com.inforside.dwsim
+runtime: org.gnome.Platform
+sdk: org.gnome.Sdk
+runtime-version: '3.38'
+command: dwsim
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.mono6
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --device=dri
+  - --share=network
+  - --filesystem=home
+  #- --env=PATH=/app/lib/dwsim:/usr/local/lib/dwsim
+cleanup:
+  #- /include
+  #- /lib/cmake
+  #- /lib/pkgconfig
+  #- /share/doc
+  #- /share/man
+  #- /etc
+  #- "*.la"
+  #- "*.a"
+
+modules:
+  #- shared-modules/glu/glu-9.json
+  - shared-modules/gtk2/gtk2.json
+
+  - name: mono
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/mono6/install.sh
+
+  - name: gtk-sharp
+    build-options:
+      append-path: /usr/lib/sdk/mono6/bin
+      append-ld-library-path: /usr/lib/sdk/mono6/lib
+      env:
+        PKG_CONFIG_PATH: /app/lib/pkgconfig:/app/share/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig:/usr/lib/sdk/mono6/lib/pkgconfig
+    sources:
+      - type: archive
+        url: http://download.mono-project.com/sources/gtk-sharp212/gtk-sharp-2.12.45.tar.gz
+        sha256: 02680578e4535441064aac21d33315daa009d742cab8098ac8b2749d86fffb6a
+      - type: patch
+        path: gtk-sharp2-2.12.12-glib-include.patch
+        # https://github.com/mono/gtk-sharp/commit/3faabd7bdce8f3e3e59f0ee945f4f36ea6d3e870
+      - type: patch
+        path: gtk-sharp2-2.12.45-range-disambiguation.patch
+      - type: shell
+        commands:
+          - cp -p /usr/share/automake-*/config.{sub,guess} .;
+          - autoreconf -vfi;
+
+  - name: DWSIM
+    buildsystem: simple
+    build-commands:
+      - ar x dwsim_6.5.5-amd64.deb
+      - rm dwsim_6.5.5-amd64.deb
+      - tar xf data.tar.xz
+      - cp -r usr/local/lib /app
+      - cp dwsim /app/bin
+    sources:
+      - type: file
+        only-arches:
+          - x86_64
+        url: https://sourceforge.net/projects/dwsim/files/DWSIM/DWSIM%206.5/6.5.5/dwsim_6.5.5-amd64.deb
+        sha256: 307ef4cdd4ae9d68ba24afa8c29b009b0c816656026f520e4f01abfad905ab60
+      - type: file
+        path: dwsim
+        x-checker-data:
+          type: git
+          tag-pattern: ^(v[\d.]+)$

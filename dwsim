@@ -1,0 +1,5 @@
+#!/bin/sh
+export DYLD_LIBRARY_PATH=/app/lib/dwsim:/app/lib/dwsim/ThermoCS:$DYLD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/app/lib/dwsim:/app/lib/dwsim/ThermoCS:$LD_LIBRARY_PATH
+cd /app/lib/dwsim
+exec /app/bin/mono DWSIM.UI.Desktop.exe "$@"
