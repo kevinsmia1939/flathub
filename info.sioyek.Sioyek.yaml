@@ -37,8 +37,9 @@ modules:
       - qmake pdf_viewer_build_config.pro
       - make
       - ls -l
-      - cp {sioyek,mupdf} /app/bin
-      - cp LICENSE /app/share/licenses/info.sioyek.Sioyek
+      - mkdir -p /app/bin /app/share/licenses
+      - cp -r {sioyek,mupdf} /app/bin
+      - cp -r LICENSE /app/share/licenses/info.sioyek.Sioyek
       - mkdir build
       - cp sioyek build/sioyek
       - cp pdf_viewer/prefs.config build/prefs.config
