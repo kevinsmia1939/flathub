@@ -48,8 +48,8 @@ modules:
     builddir: true
     sources:
       - type: archive
-        url: https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.bz2
-        sha256: 0fa5cafe78f66d2b501b43016858070d52ba47bd9b1016b0165a7b8e04675677
+        url: https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2
+        sha256: b4c198460eba6f28d34894e3a5710998818515104d6e74e5cc331ce31e46e626
         x-checker-data:
           type: anitya
           project-id: 13751
@@ -117,8 +117,8 @@ modules:
         LDFLAGS: -shared
     sources:
       - type: archive
-        url: https://files.pythonhosted.org/packages/bb/bb/944f559d554df6c9adf037aa9fc982a9706ee0e96c0d5beac701cb158900/scipy-1.7.0.tar.gz
-        sha256: 998c5e6ea649489302de2c0bc026ed34284f531df89d2bdc8df3a0d44d165739
+        url: https://files.pythonhosted.org/packages/47/33/a24aec22b7be7fdb10ec117a95e1e4099890d8bbc6646902f443fc7719d1/scipy-1.7.1.tar.gz
+        sha256: 6b47d5fa7ea651054362561a28b1ccc8da9368a39514c1bbf6c0977a1c376764
         x-checker-data:
           type: pypi
           name: scipy
@@ -187,8 +187,8 @@ modules:
     builddir: true
     sources:
       - type: archive
-        url: https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.2.0.tar.gz
-        sha256: cee20b0a71d977416f3e3b4ec643ee4f38cedeb2a9ff015303431dd9d8d79854
+        url: https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.3.0.tar.gz
+        sha256: 8f616561603695bbb83871875d2c6051ea28f8187dbe59299961369904d1d49e
         x-checker-data:
           type: anitya
           project-id: 227581
@@ -232,8 +232,8 @@ modules:
       - -DGDCM_BUILD_DOCBOOK_MANPAGES:BOOL=OFF
     sources:
       - type: archive
-        url: https://github.com/malaterre/GDCM/archive/v3.0.8.tar.gz
-        sha256: 47b96be345b1611784f9e65fc39367c7450c9a1ef81c21f8acddfb6207098315
+        url: https://github.com/malaterre/GDCM/archive/v3.0.9.tar.gz
+        sha256: fcfc50ea8809bd4a173550c7d7bb4f8722ae0781fbf17240ce84a04e90af0e9b
         x-checker-data:
           type: anitya
           project-id: 883
@@ -312,8 +312,8 @@ modules:
       - -DITK_FORBID_DOWNLOADS=ON
     sources:
       - type: archive
-        url: https://github.com/InsightSoftwareConsortium/ITK/archive/refs/tags/v5.2.0.tar.gz
-        sha256: e53961cd78df8bcfaf8bd8b813ae2cafdde984c7650a2ddf7dcf808df463ea74
+        url: https://github.com/InsightSoftwareConsortium/ITK/archive/refs/tags/v5.2.1.tar.gz
+        sha256: 6022b2b64624b8bcec3333fe48d5f74ff6ebceb3bdf98258ba7d7fbbc76b99ab
         x-checker-data:
           type: anitya
           project-id: 223473
