@@ -1,0 +1,60 @@
+app-id: org.o3de.O3DE
+runtime: org.freedesktop.Sdk
+sdk: org.freedesktop.Sdk
+runtime-version: '20.08'
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.llvm11
+command: o3de
+rename-desktop-file: o3de.desktop
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --filesystem=home
+cleanup:
+  #- /include
+  #- /lib/cmake
+  #- /share/doc
+  #- /etc
+  #- '*.la'
+  #- '*.a'
+
+modules:
+  - shared-modules/glew/glew.json
+
+  - name: O3DE
+    buildsystem: cmake
+    builddir: true
+    config-opts:
+      - -DCLANG_LINK_CLANG_DYLIB:BOOL=ON
+    build-options:
+      env:
+        CC: clang
+        CXX: clang++
+        prepend-path: /usr/lib/sdk/llvm11/bin
+        prepend-ld-library-path: /usr/lib/sdk/llvm11/lib
+    sources:
+      - type: git
+        url: git://github.com/o3de/o3de.git
+        tag: 2111.1
+        commit: 1da5ef16a8f03ca76b0ed47cac21d18583ecab23
+
+  #- name: hdf5
+    #buildsystem: cmake-ninja
+    #builddir: true
+    #config-opts:
+      #- -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      #- -DBUILD_TESTING:BOOL=OFF
+      #- -DHDF5_BUILD_EXAMPLES:BOOL=OFF
+    #cleanup:
+      #- /share/hdf5_examples
+    #sources:
+      #- type: archive
+        #url: https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5-1_12_1.tar.gz
+        #sha256: e6dde173c2d243551922d23a0387a79961205b018502e6a742acb30b61bc2d5f
+        #x-checker-data:
+          #type: anitya
+          #project-id: 1303
+          #stable-only: true
+          #url-template: https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5-$version.tar.gz
