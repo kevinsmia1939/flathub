@@ -1,0 +1,13 @@
+Binary files a/.git/index and b/.git/index differ
+diff -ruN a/src/rtaudio.cpp b/src/rtaudio.cpp
+--- a/src/rtaudio.cpp	2022-03-14 10:50:49.136776742 +0100
++++ b/src/rtaudio.cpp	2022-03-14 12:06:13.466895067 +0100
+@@ -5,7 +5,7 @@
+ #ifndef __clang__
+ 	#pragma GCC diagnostic ignored "-Wsuggest-override"
+ #endif
+-#include <rtaudio/RtAudio.h>
++#include <RtAudio.h>
+ #pragma GCC diagnostic pop
+ 
+ #include <rtaudio.hpp>

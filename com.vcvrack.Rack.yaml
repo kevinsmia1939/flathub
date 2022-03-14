@@ -27,33 +27,6 @@ modules:
   - shared-modules/glu/glu-9.json
   - shared-modules/linux-audio/jack2.json
 
-  - name: NanoVG
-    buildsystem: simple
-    build-commands:
-      - cp -r src/* /app/include
-    sources:
-      - type: git
-        url: https://github.com/memononen/nanovg
-        branches: master
-
-  - name: NanoSVG
-    buildsystem: simple
-    build-commands:
-      - cp -r src/* /app/include
-    sources:
-      - type: git
-        url: https://github.com/memononen/nanosvg
-        branches: master
-
-  - name: bgfx
-    buildsystem: simple
-    build-commands:
-      - cp -r examples/20-nanovg/blendish.h /app/include
-    sources:
-      - type: git
-        url: https://github.com/bkaradzic/bgfx
-        branches: master
-
   - name: glfw
     buildsystem: cmake-ninja
     config-opts:
@@ -85,10 +58,64 @@ modules:
           type: git
           tag-pattern: ^(v[\d.]+)$
 
+  - name: speexdsp-SpeexDSP
+    sources:
+      - type: archive
+        url: https://vcvrack.com/downloads/dep/speexdsp-SpeexDSP-1.2rc3.tgz
+        sha256: c8dded1454747f65956f981c95e7f89a06abdaa2a53e8aeaa66bab2a3d59cebd
+
+  - name: libsamplerate
+    config-opts:
+      - --disable-fftw
+      - --disable-sndfile
+    sources:
+      - type: archive
+        url: http://www.mega-nerd.com/SRC/libsamplerate-0.1.9.tar.gz
+        sha256: 0a7eb168e2f21353fb6d84da152e4512126f7dc48ccb0be80578c565413444c1
+
+  #- name: rtmidi
+    #buildsystem: cmake-ninja
+    #config-opts:
+      #- -DCMAKE_BUILD_TYPE=RelWithDebInfo
+    #sources:
+      #- type: git
+        #url: https://github.com/thestk/rtmidi.git
+        #tag: 5.0.0
+        #commit: 84a99422a3faf1ab417fe71c0903a48debb9376a
+
+  #- name: rtaudio
+    #buildsystem: cmake
+    #config-opts:
+      #- -DRTAUDIO_BUILD_STATIC_LIBS=ON
+      #- -DRTAUDIO_BUILD_TESTING=OFF
+      #- -DRTAUDIO_API_ALSA=ON
+      #- -DRTAUDIO_API_JACK=ON
+      #- -DRTAUDIO_API_PULSE=ON
+      #- -DRTAUDIO_API_OSS=OFF
+    #sources:
+    #- type: archive
+      #url: http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-5.1.0.tar.gz
+      #sha256: ff138b2b6ed2b700b04b406be718df213052d4c952190280cf4e2fab4b61fe09
+
   - name: Rack2
+    build-options:
+      ldflags: -L/app/lib/
+      #env:
+        #LIBRARY_PATH: "/app/lib:dep/lib/"
+        #LD_LIBRARY_PATH: "/app/lib:dep/lib/"
     buildsystem: simple
     build-commands:
-      - make -j $FLATPAK_BUILDER_N_JOBS
+      - cp -r dep/pffft/*h ${FLATPAK_DEST}/include
+      - cp -r dep/oui-blendish/*h ${FLATPAK_DEST}/include
+      - cp -r dep/osdialog/*h ${FLATPAK_DEST}/include
+      - cp -r dep/nanovg/src/*h ${FLATPAK_DEST}/include
+      - cp -r dep/nanovg/example/stb_image_write.h ${FLATPAK_DEST}/include
+      - cp -r dep/nanosvg/src/*h ${FLATPAK_DEST}/include
+      - cp -r dep/fuzzysearchdatabase/src/FuzzySearchDatabase.hpp ${FLATPAK_DEST}/include
+      - cp -r dep/filesystem/include/ghc ${FLATPAK_DEST}/include
+      - 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:dep/lib/'
+      - mkdir -p dep/rtaudio/build && cd dep/rtaudio/build && cmake .. -DRTAUDIO_BUILD_STATIC_LIBS=ON -DRTAUDIO_BUILD_TESTING=OFF -DRTAUDIO_API_ALSA=ON -DRTAUDIO_API_JACK=ON -DRTAUDIO_API_PULSE=ON -DRTAUDIO_API_OSS=OFF -DCMAKE_INSTALL_PREFIX=/app && cd .. && make -C build && make -C build install
+      - mkdir -p dep/rtmidi && cd dep/rtmidi && ./autogen.sh --no-configure && ./configure --prefix=/app --enable-shared=no --with-alsa --with-jack && cd .. && make -C rtmidi && make -C rtmidi install
       - make
       - make run
     sources:
@@ -97,6 +124,12 @@ modules:
         #branches: v2
         commit: 30665d62801c2ced7260a37a2d0214edfe6528a9
         tag: v2.1.0
+      #- type: patch
+        #path: fix_rtautio_include_path.patch
+      #- type: patch
+        #path: disable_dep_download.patch
+
+#nanovg/example/stb_image_write.h
 
     # Don't know why using post-install on ParaView fail.
   #- name: install-icon
