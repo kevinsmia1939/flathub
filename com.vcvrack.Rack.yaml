@@ -221,13 +221,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/VCVRack/Rack
-        #branches: v2
         commit: 30665d62801c2ced7260a37a2d0214edfe6528a9
         tag: v2.1.0
-      #- type: patch
-        #path: fix_rtautio_include_path.patch
-      #- type: patch
-        #path: disable_dep_download.patch
 
 #nanovg/example/stb_image_write.h
 
