@@ -139,15 +139,16 @@ modules:
         url: https://curl.se/download/curl-7.79.1.tar.gz
         sha256: 370b11201349816287fb0ccc995e420277fbfcaf76206e309b3f60f0eda090c2
 
+    # Rack want static lib.
   - name: zstd
-    buildsystem: meson
+    buildsystem: cmake
     builddir: true
-    subdir: build/meson
+    subdir: build/cmake
     config-opts:
       - -DZSTD_BUILD_PROGRAMS=ON
       - -DZSTD_BUILD_SHARED=ON
       - -DZSTD_BUILD_STATIC=ON
-      - -DZSTD_MULTITHREAD_SUPPORT=ON
+      - -DZSTD_MULTITHREAD_SUPPORT=OFF
     sources:
       - type: archive
         url: https://github.com/facebook/zstd/releases/download/v1.5.2/zstd-1.5.2.tar.gz
@@ -157,6 +158,7 @@ modules:
           project-id: 12083
           url-template: https://github.com/facebook/zstd/releases/download/v$version/zstd-$version.tar.gz
 
+    # Rack want static lib.
   - name: libarchive
     buildsystem: cmake
     config-opts:
@@ -188,16 +190,12 @@ modules:
       - type: archive
         url: https://libarchive.org/downloads/libarchive-3.4.3.tar.gz
         sha256: ee1e749213c108cb60d53147f18c31a73d6717d7e3d2481c157e1b34c881ea39
-        #x-checker-data:
-          #type: git
-          #tag-pattern: ^(v[\d.]+)$
+        x-checker-data:
+          type: anitya
+          project-id: 1558
+          url-template: https://libarchive.org/downloads/libarchive-$version.tar.gz
 
   - name: Rack2
-    build-options:
-      ldflags: -L/app/lib/librtmidi.a
-      #env:
-        #LIBRARY_PATH: "/app/lib:dep/lib/"
-        #LD_LIBRARY_PATH: "/app/lib:dep/lib/"
     buildsystem: simple
     build-commands:
       - cp -r dep/pffft/*h ${FLATPAK_DEST}/include #Installing git module dependencies
@@ -210,9 +208,8 @@ modules:
       - cp -r dep/filesystem/include/ghc ${FLATPAK_DEST}/include
       - sed -i 's:-Idep/include:-I/app/include:g' Makefile # Replace LDFLAGS search path witth flatpak path
       - sed -i 's:dep/lib:/app/lib:g' Makefile
-      - cat Makefile
-      - mkdir -p dep/rtaudio/build && cd dep/rtaudio/build && cmake .. -DRTAUDIO_BUILD_STATIC_LIBS=ON -DRTAUDIO_BUILD_TESTING=OFF -DRTAUDIO_API_ALSA=ON -DRTAUDIO_API_JACK=ON -DRTAUDIO_API_PULSE=ON -DRTAUDIO_API_OSS=OFF -DCMAKE_INSTALL_PREFIX=/app && cd .. && make -C build && make -C build install
-      - mkdir -p dep/rtmidi && cd dep/rtmidi && ./autogen.sh --no-configure && ./configure --prefix=/app --enable-shared=no --with-alsa --with-jack && cd .. && make -C rtmidi && make -C rtmidi install
+      - mkdir -p dep/rtmidi && cd dep/rtmidi && ./autogen.sh --no-configure && ./configure --prefix=/app --enable-shared=no --with-alsa --with-jack && cd .. && make -C rtmidi CXXFLAGS="-fPIC" CFLAGS="-fPIC" && make -C rtmidi install
+      - mkdir -p dep/rtaudio/build && cd dep/rtaudio/build && cmake .. -DRTAUDIO_BUILD_STATIC_LIBS=ON -DRTAUDIO_BUILD_TESTING=OFF -DRTAUDIO_API_ALSA=ON -DRTAUDIO_API_JACK=ON -DRTAUDIO_API_PULSE=ON -DRTAUDIO_API_OSS=OFF -DCMAKE_INSTALL_PREFIX=/app && cd .. && make -C build CXXFLAGS="-fPIC" CFLAGS="-fPIC" && make -C build install
       - make
       - make run
     sources:
