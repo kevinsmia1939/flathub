@@ -31,7 +31,7 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - -DGLFW_USE_WAYLAND:BOOL=ON
-      - -DBUILD_SHARED_LIBS:BOOL=ON
+      - -DBUILD_SHARED_LIBS:BOOL=OFF
       - -DGLFW_BUILD_EXAMPLES:BOOL=OFF
       - -DGLFW_BUILD_TESTS:BOOL=OFF
       - -DGLFW_BUILD_DOCS:BOOL=OFF
@@ -73,39 +73,134 @@ modules:
         url: http://www.mega-nerd.com/SRC/libsamplerate-0.1.9.tar.gz
         sha256: 0a7eb168e2f21353fb6d84da152e4512126f7dc48ccb0be80578c565413444c1
 
-  #- name: rtmidi
-    #buildsystem: cmake-ninja
-    #config-opts:
-      #- -DCMAKE_BUILD_TYPE=RelWithDebInfo
-    #sources:
-      #- type: git
-        #url: https://github.com/thestk/rtmidi.git
-        #tag: 5.0.0
-        #commit: 84a99422a3faf1ab417fe71c0903a48debb9376a
+    # Rack want static lib.
+  - name: openssl
+    buildsystem: simple
+    build-commands:
+      - ./config --prefix=${FLATPAK_DEST} no-shared no-hw threads no-zlib no-capieng no-pinshared && make && make install_sw
+    sources:
+      - type: archive
+        url: https://www.openssl.org/source/openssl-1.1.1k.tar.gz
+        sha256: 892a0875b9872acd04a9fde79b1f943075d5ea162415de3047c327df33fbaee5
 
-  #- name: rtaudio
-    #buildsystem: cmake
-    #config-opts:
-      #- -DRTAUDIO_BUILD_STATIC_LIBS=ON
-      #- -DRTAUDIO_BUILD_TESTING=OFF
-      #- -DRTAUDIO_API_ALSA=ON
-      #- -DRTAUDIO_API_JACK=ON
-      #- -DRTAUDIO_API_PULSE=ON
-      #- -DRTAUDIO_API_OSS=OFF
-    #sources:
-    #- type: archive
-      #url: http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-5.1.0.tar.gz
-      #sha256: ff138b2b6ed2b700b04b406be718df213052d4c952190280cf4e2fab4b61fe09
+    # Rack want static lib.
+  - name: curl
+    config-opts:
+      - --disable-symbol-hiding
+      - --enable-shared=no
+      - --enable-http
+      - --disable-ftp
+      - --disable-file
+      - --disable-ldap
+      - --disable-ldaps
+      - --disable-rtsp
+      - --enable-proxy
+      - --disable-dict
+      - --disable-telnet
+      - --disable-tftp
+      - --disable-pop3
+      - --disable-imap
+      - --disable-smb
+      - --disable-smtp
+      - --disable-gopher
+      - --disable-mqtt
+      - --disable-manual
+      - --enable-threaded-resolver
+      - --enable-pthreads
+      - --enable-verbose
+      - --disable-sspi
+      - --disable-ntlm
+      - --disable-ntlm-wb
+      - --disable-tls-srp
+      - --disable-unix-sockets
+      - --disable-doh
+      - --disable-mime
+      - --disable-dateparse
+      - --disable-netrc
+      - --disable-progress-meter
+      - --disable-alt-svc
+      - --without-hyper
+      - --without-zlib
+      - --without-brotli
+      - --without-zstd
+      - --without-libpsl
+      - --without-libgsasl
+      - --without-libssh2
+      - --without-librtmp
+      - --without-winidn
+      - --without-libidn2
+      - --without-nghttp2
+      - --without-ngtcp2
+      - --without-nghttp3
+      - --without-quiche
+      - --with-ssl=/app
+    sources:
+      - type: archive
+        url: https://curl.se/download/curl-7.79.1.tar.gz
+        sha256: 370b11201349816287fb0ccc995e420277fbfcaf76206e309b3f60f0eda090c2
+
+  - name: zstd
+    buildsystem: meson
+    builddir: true
+    subdir: build/meson
+    config-opts:
+      - -DZSTD_BUILD_PROGRAMS=ON
+      - -DZSTD_BUILD_SHARED=ON
+      - -DZSTD_BUILD_STATIC=ON
+      - -DZSTD_MULTITHREAD_SUPPORT=ON
+    sources:
+      - type: archive
+        url: https://github.com/facebook/zstd/releases/download/v1.5.2/zstd-1.5.2.tar.gz
+        sha256: 7c42d56fac126929a6a85dbc73ff1db2411d04f104fae9bdea51305663a83fd0
+        x-checker-data:
+          type: anitya
+          project-id: 12083
+          url-template: https://github.com/facebook/zstd/releases/download/v$version/zstd-$version.tar.gz
+
+  - name: libarchive
+    buildsystem: cmake
+    config-opts:
+      - -DENABLE_ACL:BOOL=OFF
+      - -DENABLE_BZip2:BOOL=OFF
+      - -DENABLE_CAT:BOOL=OFF
+      - -DENABLE_CNG:BOOL=OFF
+      - -DENABLE_COVERAGE:BOOL=OFF
+      - -DENABLE_CPIO:BOOL=OFF
+      - -DENABLE_EXPAT:BOOL=OFF
+      - -DENABLE_ICONV:BOOL=OFF
+      - -DENABLE_LIBB2:BOOL=OFF
+      - -DENABLE_LIBXML2:BOOL=OFF
+      - -DENABLE_LZ4:BOOL=OFF
+      - -DENABLE_LZMA:BOOL=OFF
+      - -DENABLE_LZO:BOOL=OFF
+      - -DENABLE_MBEDTLS:BOOL=OFF
+      - -DENABLE_NETTLE:BOOL=OFF
+      - -DENABLE_OPENSSL:BOOL=OFF
+      - -DENABLE_TAR:BOOL=OFF
+      - -DENABLE_TEST:BOOL=OFF
+      - -DENABLE_WERROR:BOOL=OFF
+      - -DENABLE_XATTR:BOOL=OFF
+      - -DENABLE_ZLIB:BOOL=OFF
+      - -DENABLE_ZSTD:BOOL=ON
+      - -DZSTD_INCLUDE_DIR:PATH=/app/include
+      - -DBUILD_TESTING:BOOL=OFF
+    sources:
+      - type: archive
+        url: https://libarchive.org/downloads/libarchive-3.4.3.tar.gz
+        sha256: ee1e749213c108cb60d53147f18c31a73d6717d7e3d2481c157e1b34c881ea39
+        #x-checker-data:
+          #type: git
+          #tag-pattern: ^(v[\d.]+)$
 
   - name: Rack2
     build-options:
-      ldflags: -L/app/lib/
+      ldflags: -L/app/lib/librtmidi.a
       #env:
         #LIBRARY_PATH: "/app/lib:dep/lib/"
         #LD_LIBRARY_PATH: "/app/lib:dep/lib/"
     buildsystem: simple
     build-commands:
-      - cp -r dep/pffft/*h ${FLATPAK_DEST}/include
+      - cp -r dep/pffft/*h ${FLATPAK_DEST}/include #Installing git module dependencies
       - cp -r dep/oui-blendish/*h ${FLATPAK_DEST}/include
       - cp -r dep/osdialog/*h ${FLATPAK_DEST}/include
       - cp -r dep/nanovg/src/*h ${FLATPAK_DEST}/include
@@ -113,7 +208,9 @@ modules:
       - cp -r dep/nanosvg/src/*h ${FLATPAK_DEST}/include
       - cp -r dep/fuzzysearchdatabase/src/FuzzySearchDatabase.hpp ${FLATPAK_DEST}/include
       - cp -r dep/filesystem/include/ghc ${FLATPAK_DEST}/include
-      - 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:dep/lib/'
+      - sed -i 's:-Idep/include:-I/app/include:g' Makefile # Replace LDFLAGS search path witth flatpak path
+      - sed -i 's:dep/lib:/app/lib:g' Makefile
+      - cat Makefile
       - mkdir -p dep/rtaudio/build && cd dep/rtaudio/build && cmake .. -DRTAUDIO_BUILD_STATIC_LIBS=ON -DRTAUDIO_BUILD_TESTING=OFF -DRTAUDIO_API_ALSA=ON -DRTAUDIO_API_JACK=ON -DRTAUDIO_API_PULSE=ON -DRTAUDIO_API_OSS=OFF -DCMAKE_INSTALL_PREFIX=/app && cd .. && make -C build && make -C build install
       - mkdir -p dep/rtmidi && cd dep/rtmidi && ./autogen.sh --no-configure && ./configure --prefix=/app --enable-shared=no --with-alsa --with-jack && cd .. && make -C rtmidi && make -C rtmidi install
       - make
