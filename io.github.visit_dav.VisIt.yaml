@@ -1,0 +1,144 @@
+app-id: io.github.visit_dav.VisIt
+runtime: org.kde.Platform
+sdk: org.kde.Sdk
+runtime-version: 5.15-21.08
+rename-icon: paraview
+command: paraview
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --device=dri
+  - --share=network
+  - --filesystem=home
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig
+  - /share/doc
+  - /share/man
+  - /etc
+  - '*.la'
+  - '*.a'
+
+# Disable ARM support, ParaView does not support it anyway.
+modules:
+  - shared-modules/glew/glew.json
+
+  - name: Eigen3
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: archive
+        url: https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2
+        sha256: b4c198460eba6f28d34894e3a5710998818515104d6e74e5cc331ce31e46e626
+        x-checker-data:
+          type: anitya
+          project-id: 13751
+          stable-only: true
+          url-template: https://gitlab.com/libeigen/eigen/-/archive/$version/eigen-$version.tar.bz2
+    cleanup:
+      - '*'
+
+  - name: VTK
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DBUILD_SHARED_LIBS=ON
+      - -DOpenGL_GL_PREFERENCE=GLVND
+      - -DBUILD_TESTING:BOOL=OFF
+      - -DCMAKE_BUILD_TYPE=Release
+      #- -DVTK_WRAP_PYTHON:BOOL=ON
+      - -DVTK_LEGACY_REMOVE:BOOL=ON
+      - -DModule_vtkGUISupportQtOpenGL:BOOL=ON
+      - -DModule_vtkPython:BOOL=ON
+      - -DVTK_USE_SYSTEM_EIGEN:BOOL=ON
+      #- -DVTK_USE_SYSTEM_FREETYPE:BOOL=ON
+      - -DVTK_USE_SYSTEM_GLEW:BOOL=ON
+      #- -DVTK_USE_SYSTEM_LIBRARIES:BOOL=ON
+      - -DVTK_USE_SYSTEM_LZ4:BOOL=ON
+      - -DVTK_USE_SYSTEM_LZMA:BOOL=ON
+      - -DVTK_USE_SYSTEM_ZLIB:BOOL=ON
+    #- -DVTK_MODULE_ENABLE_VTK_RenderingRayTracing=WANT
+    #- -DVTKOSPRAY_ENABLE_DENOISER:BOOL=ON
+    sources:
+      - type: archive
+        url: https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz
+        sha256: 34c3dc775261be5e45a8049155f7228b6bd668106c72a3c435d95730d17d57bb
+      - type: patch
+        path: vtk-8.2.0-gcc-10.patch
+      - type: patch
+        path: vtk-freetype-2.10.3.patch
+      - type: patch
+        path: vtk-python-3.8.patch
+      - type: patch
+        path: vtk-qt5.15.patch
+      - type: patch
+        path: vtk_exodus.patch
+        #x-checker-data:
+          #type: anitya
+          #project-id: 15084
+          #stable-only: true
+          #url-template: https://www.vtk.org/files/release/$major.$minor/VTK-$version.tar.gz
+
+  - name: qwt
+    buildsystem: qmake
+    config-opts:
+      - -after
+      - QWT_INSTALL_PREFIX=/app
+    sources:
+      - type: archive
+        url: https://sourceforge.net/projects/qwt/files/qwt/6.1.6/qwt-6.1.6.tar.bz2
+        sha256: 99460d31c115ee4117b0175d885f47c2c590d784206f09815dc058fbe5ede1f6
+        x-checker-data:
+          type: anitya
+          project-id: 4147
+          stable-only: true
+          url-template: https://sourceforge.net/projects/qwt/files/qwt/$version/qwt-$version.tar.bz2
+      - type: shell
+        commands:
+          - "sed 's/QWT_INSTALL_PREFIX\\s*=\\s*\\/usr\\/local\\/qwt-$$QWT_VERSION/QWT_INSTALL_PREFIX=\\/app/g' -i qwtconfig.pri"
+          - "sed 's/#QWT_CONFIG\\s*+=\\s*QwtPkgConfig/QWT_CONFIG+=QwtPkgConfig/g' -i qwtconfig.pri"
+
+  - name: testr
+    buildsystem: simple
+    build-commands:
+      - ls -la /lib
+      - ls -la /
+      #- locate -i zlib
+      ##- ls -l /usr/lib64
+      ##- whereis zlib
+      ##- ls -l /usr/include
+      ##- gdsdgfd
+
+  #- name: zlib
+    #sources:
+      #- type: archive
+        #url: https://zlib.net/zlib-1.2.12.tar.gz
+        #sha256: 91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9
+        #x-checker-data:
+          #type: anitya
+          #project-id: 5303
+          #url-template: https://zlib.net/zlib-$version.tar.gz
+      #- type: script
+        #dest: contrib/minizip/
+        #dest-filename: autogen.sh
+        #commands:
+          #- autoreconf -ifv
+
+  - name: VisIt
+    buildsystem: cmake
+    builddir: true
+    subdir: src
+    config-opts:
+      - -DVISIT_QWT_DIR=/app
+      - -DCMAKE_INSTALL_LIBDIR=/lib
+      - -DVISIT_ZLIB_DIR=/usr/lib/x86_64-linux-gnu/libz.so
+    sources:
+      - type: archive
+        url: https://github.com/visit-dav/visit/releases/download/v3.2.2/visit3.2.2.tar.gz
+        sha256: d19ac24c622a3bc0a71bc9cd6e5c9860e43f39e3279672129278b6ebce8d0ead
+      #- type: shell
+        #commands:
+          #- sed -i 's:64::g' src/CMake/FindZlib.cmake
+          #- sed -i 's:lib include:lib:g' src/CMake/FindZlib.cmake
+
