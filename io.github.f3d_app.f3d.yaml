@@ -4,6 +4,9 @@ sdk: org.freedesktop.Sdk
 runtime-version: '21.08'
 command: f3d
 rename-desktop-file: f3d.desktop
+build-options:
+  cflags": -O2 -g -flto -fno-fat-lto-objects
+  cxxflags": -O2 -g -flto -fno-fat-lto-objects
 finish-args:
   - --share=ipc
   - --socket=x11
