@@ -4,9 +4,6 @@ sdk: org.freedesktop.Sdk
 runtime-version: '21.08'
 command: f3d
 rename-desktop-file: f3d.desktop
-build-options:
-  cflags: -O2 -g -flto -fno-fat-lto-objects
-  cxxflags: -O2 -g -flto -fno-fat-lto-objects
 finish-args:
   - --share=ipc
   - --socket=x11
@@ -26,6 +23,9 @@ modules:
   - name: Eigen3
     buildsystem: cmake-ninja
     builddir: true
+    build-options:
+      cflags: -O2 -g -flto -fno-fat-lto-objects
+      cxxflags: -O2 -g -flto -fno-fat-lto-objects
     sources:
       - type: archive
         url: https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2
@@ -40,6 +40,9 @@ modules:
   - name: hdf5
     buildsystem: cmake-ninja
     builddir: true
+    build-options:
+      cflags: -O2 -g -flto -ffat-lto-objects
+      cxxflags: -O2 -g -flto -ffat-lto-objects
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - -DBUILD_TESTING:BOOL=OFF
@@ -62,6 +65,9 @@ modules:
   - name: TBB
     buildsystem: cmake
     builddir: true
+    build-options:
+      cflags: -O2 -g -flto -fno-fat-lto-objects
+      cxxflags: -O2 -g -flto -fno-fat-lto-objects
     sources:
       - type: archive
         url: https://github.com/oneapi-src/oneTBB/archive/2019_U8.tar.gz
@@ -72,6 +78,9 @@ modules:
     # OSPRay 1.8.0 use Embree 3.4.0
   - name: Embree
     buildsystem: cmake-ninja
+    build-options:
+      cflags: -O2 -g -flto -fno-fat-lto-objects
+      cxxflags: -O2 -g -flto -fno-fat-lto-objects
     config-opts:
       - -DEMBREE_TUTORIALS:BOOL=OFF
       - -DEMBREE_ISPC_SUPPORT:BOOL=ON
@@ -101,6 +110,9 @@ modules:
             sha256: 7a2bdd5fff5c1882639cfbd66bca31dbb68c7177f3013e80b0813a37fe0fdc23
       - name: glfw
         buildsystem: cmake-ninja
+        build-options:
+          cflags: -O2 -g -flto -fno-fat-lto-objects
+          cxxflags: -O2 -g -flto -fno-fat-lto-objects
         config-opts:
           - -DGLFW_USE_WAYLAND:BOOL=ON
           - -DBUILD_SHARED_LIBS:BOOL=ON
@@ -117,6 +129,9 @@ modules:
   - name: VTK
     buildsystem: cmake-ninja
     builddir: true
+    build-options:
+      cflags: -O2 -g -flto -fno-fat-lto-objects
+      cxxflags: -O2 -g -flto -fno-fat-lto-objects
     config-opts:
       - -DBUILD_SHARED_LIBS=ON
       - -DOpenGL_GL_PREFERENCE=GLVND
@@ -185,6 +200,7 @@ modules:
           url-template: https://prdownloads.sourceforge.net/tcl/tcl$version-src.tar.gz
 
   - name: tk
+    buildsystem: autotools
     subdir: unix
     build-options:
       no-debuginfo: true
@@ -204,6 +220,9 @@ modules:
           url-template: https://prdownloads.sourceforge.net/tcl/tk$version-src.tar.gz
 
   - name: libXmu
+    build-options:
+      cflags: -O2 -g -flto -fno-fat-lto-objects
+      cxxflags: -O2 -g -flto -fno-fat-lto-objects
     cleanup:
       - /share/doc
     sources:
@@ -218,11 +237,14 @@ modules:
 
   - name: OCCT
     buildsystem: cmake-ninja
+    build-options:
+      cflags: -O2 -g -flto -fno-fat-lto-objects
+      cxxflags: -O2 -g -flto -fno-fat-lto-objects
     config-opts:
       - -D3RDPARTY_TK_INCLUDE_DIR:PATH=/app/include
     sources:
       - type: git
-        url: git://github.com/Open-Cascade-SAS/OCCT.git
+        url: https://github.com/Open-Cascade-SAS/OCCT.git
         tag: V7_6_0
         commit: 80ffc5f84dae96de6ed093d3e5d2466a9e368b27
         x-checker-data:
@@ -231,6 +253,9 @@ modules:
 
   - name: assimp
     buildsystem: cmake-ninja
+    build-options:
+      cflags: -O2 -g -flto -fno-fat-lto-objects
+      cxxflags: -O2 -g -flto -fno-fat-lto-objects
     config-opts:
       - -DASSIMP_BUILD_ASSIMP_TOOLS:BOOL=NO
       - -DASSIMP_BUILD_TESTS:BOOL=NO
@@ -245,6 +270,9 @@ modules:
     # Move config.json as upstream request.
   - name: F3D
     buildsystem: cmake-ninja
+    build-options:
+      cflags: -O2 -g -flto -fno-fat-lto-objects
+      cxxflags: -O2 -g -flto -fno-fat-lto-objects
     config-opts:
       - -DCMAKE_INSTALL_PREFIX:PATH=/app
       - -DCMAKE_BUILD_TYPE:STRING=Release
