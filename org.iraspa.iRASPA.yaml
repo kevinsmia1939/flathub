@@ -1,0 +1,79 @@
+app-id: org.iraspa.iRASPA
+runtime: org.kde.Platform
+sdk: org.kde.Sdk
+runtime-version: '6.2'
+#base: io.qt.qtwebengine.BaseApp
+#base-version: 5.15-21.08
+#rename-icon: iraspa
+command: iraspa
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --device=dri
+  - --share=network
+  - --filesystem=home
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig
+  - /share/doc
+  - /share/man
+  - /etc
+  - '*.la'
+  - '*.a'
+modules:
+  - name: OpenCL-Headers
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://github.com/KhronosGroup/OpenCL-Headers.git
+        tag: v2022.05.18
+        commit: def8be9d35fda35492b72f54a94515f7df8d1e9f
+        x-checker-data:
+          type: git
+          tag-pattern: ^(v[\d.]+)$
+
+  - name: iRASPA-QT
+    buildsystem: simple
+    build-commands:
+      - mkdir -p ${FLATPAK_DEST}/share/iraspa
+      - mkdir -p ${FLATPAK_DEST}/bin
+      - install -m 644 iraspa/datafiles/databasecoremof.irspdoc ${FLATPAK_DEST}/share/iraspa
+      - install -m 644 iraspa/datafiles/databasecoremofddec.irspdoc ${FLATPAK_DEST}/share/iraspa
+      - install -m 644 iraspa/datafiles/databaseiza.irspdoc ${FLATPAK_DEST}/share/iraspa
+      - install -m 644 iraspa/datafiles/libraryofstructures.irspdoc ${FLATPAK_DEST}/share/iraspa
+      - install -m 644 iraspa/datafiles/license-gpl.pdf ${FLATPAK_DEST}/share/iraspa
+      - install -m 644 iraspa/datafiles/acknowledgedlicenses.pdf ${FLATPAK_DEST}/share/iraspa
+      - install -Dm 644 iraspa/datafiles/iraspa.desktop ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+      - desktop-file-edit --set-icon=${FLATPAK_ID} ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+      - install -Dm 644 iraspa/datafiles/iraspa.iconset/icon_512x512.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/${FLATPAK_ID}.png
+      - qmake6 iraspa.pro
+      - make
+      - install -m 755 $FLATPAK_BUILDER_BUILDDIR/iraspa ${FLATPAK_DEST}/bin/
+    sources:
+      - type: git
+        url: https://github.com/iRASPA/iRASPA-QT
+        tag: 2.2.5
+
+  #- name: iRASPA-QT
+    #buildsystem: qmake
+    #no-make-install: true
+    #config-opts:
+      #- iraspa.pro
+    #post-install:
+      #- mkdir -p ${FLATPAK_DEST}/bin
+      #- mkdir -p ${FLATPAK_DEST}/share/iraspa
+      #- install -m 755 $FLATPAK_BUILDER_BUILDDIR/iraspa ${FLATPAK_DEST}/bin/
+      #- install -m 644 iraspa/datafiles/databasecoremof.irspdoc ${FLATPAK_DEST}/share/iraspa
+      #- install -m 644 iraspa/datafiles/databasecoremofddec.irspdoc ${FLATPAK_DEST}/share/iraspa
+      #- install -m 644 iraspa/datafiles/databaseiza.irspdoc ${FLATPAK_DEST}/share/iraspa
+      #- install -m 644 iraspa/datafiles/libraryofstructures.irspdoc ${FLATPAK_DEST}/share/iraspa
+      #- install -m 644 iraspa/datafiles/license-gpl.pdf ${FLATPAK_DEST}/share/iraspa
+      #- install -m 644 iraspa/datafiles/acknowledgedlicenses.pdf ${FLATPAK_DEST}/share/iraspa
+      #- install -Dm 644 iraspa/datafiles/iraspa.desktop ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+      #- desktop-file-edit --set-icon=${FLATPAK_ID} ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+      #- install -Dm 644 iraspa/datafiles/iraspa.iconset/icon_512x512.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/${FLATPAK_ID}.png
+    #sources:
+      #- type: git
+        #url: https://github.com/iRASPA/iRASPA-QT
+        #tag: 2.2.5
