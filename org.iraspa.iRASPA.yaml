@@ -13,12 +13,6 @@ finish-args:
   - --share=network
   - --filesystem=home
 cleanup:
-  - /include
-  - /lib/cmake
-  - /lib/pkgconfig
-  - /share/doc
-  - /share/man
-  - /etc
   - '*.la'
   - '*.a'
 modules:
@@ -49,7 +43,8 @@ modules:
       - install -Dm 644 iraspa/datafiles/iraspa.iconset/icon_512x512.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/${FLATPAK_ID}.png
       - qmake6 iraspa.pro
       - make
-      - install -m 755 $FLATPAK_BUILDER_BUILDDIR/iraspa ${FLATPAK_DEST}/bin/
+      - ls -l ${FLATPAK_BUILDER_BUILDDIR}/iraspa/
+      - install -m 755 ${FLATPAK_BUILDER_BUILDDIR}/iraspa/iraspa ${FLATPAK_DEST}/bin/
     sources:
       - type: git
         url: https://github.com/iRASPA/iRASPA-QT
