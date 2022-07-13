@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=KNIME
+GenericName=Data analytics platform
+Comment=Data analytics, reporting and integration platform
+Exec=knime %U
+Terminal=false
+Type=Application
+Icon=com.knime.KNIME
+Categories=Development;Education;Science;

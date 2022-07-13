@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+    <id>com.knime.KNIME</id>
+    <launchable type="desktop-id">com.knime.KNIME.desktop</launchable>
+    <name>KNIME</name>
+    <summary>Data analytics, reporting and integration platform</summary>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL-3.0-only</project_license>
+    <description>
+        <p>
+            KNIME integrates various components for machine learning and data mining
+            through its modular data pipelining "Building Blocks of Analytics" concept.
+            A graphical user interface and use of JDBC allows assembly of nodes
+            blending different data sources, including preprocessing, for modeling,
+            data analysis and visualization without, or with only minimal, programming.
+        </p>
+    </description>
+    <url type="homepage">https://www.knime.com/</url>
+    <url type="help">https://hub.knime.com/</url>
+    <url type="bugtracker">https://forum.knime.com/</url>
+    <developer_name>KNIME</developer_name>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://www.knime.com/sites/default/files/styles/inline_large/public/inline-images/baseflow_800.jpg?itok=lbk5f2oL</image>
+        </screenshot>
+        <screenshot>
+            <image>https://www.knime.com/sites/default/files/styles/inline_large/public/views_small.png?itok=E-W-9W-o</image>
+        </screenshot>
+        <screenshot>
+            <image>https://www.knime.com/sites/default/files/styles/inline_large/public/highlighting_small.png?itok=ul2qEDlg</image>
+        </screenshot>
+        <screenshot>
+            <image>https://www.knime.com/sites/default/files/styles/inline_large/public/molecules_small.png?itok=NI_3cnsr</image>
+        </screenshot>
+        <screenshot>
+            <image>https://www.knime.com/sites/default/files/styles/inline_large/public/metaflow_small.png?itok=uzVz_RP6</image>
+        </screenshot>
+        <screenshot>
+            <image>https://www.knime.com/sites/default/files/styles/inline_large/public/external_small.png?itok=DneYbunI</image>
+        </screenshot>
+    </screenshots>
+    <content_rating type="oars-1.1"/>
+    <releases>
+        <release version="4.6.0" date="2022-06-22">
+        </release>    
+    </releases>
+</component>
