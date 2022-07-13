@@ -1,0 +1,20 @@
+--- src/Makefile	2004-10-24 21:21:12.000000000 -0500
++++ src/Makefile.new	2010-05-22 01:42:31.085510085 -0500
+@@ -17,7 +17,7 @@
+ 
+ # Real build targets
+ libnoise.so.0.3: $(OBJECTS)
+-	$(LIBTOOL) --mode=link $(CXX) $(LDFLAGS) -shared -Wl,-soname=libnoise.so.0 -o $@ $(OBJECTS:.o=.lo)
++	$(LIBTOOL) --mode=link $(CXX) $(LDFLAGS) -Xcompiler -shared -Wl,-soname=libnoise.so.0 -o $@ $(OBJECTS:.o=.lo)
+ 
+ libnoise.a: $(OBJECTS)
+ 	$(LIBTOOL) --mode=link $(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
+@@ -46,7 +46,7 @@
+ 
+ # C and C++ libtool (rather than raw CXX/CC) use
+ %.o %.lo: %.cpp
+-	$(LIBTOOL) --mode=compile $(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $(@:.lo=.o)
++	$(LIBTOOL) --mode=compile $(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CFLAGS) -c $< -o $(@:.lo=.o)
+ 
+ %.o %.lo: %.c
+ 	$(LIBTOOL) --mode=compile $(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $(@:.lo=.o)

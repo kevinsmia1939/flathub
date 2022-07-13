@@ -1,0 +1,22 @@
+Index: Cytopia-0.2.1/src/CMakeLists.txt
+===================================================================
+--- Cytopia-0.2.1.orig/src/CMakeLists.txt
++++ Cytopia-0.2.1/src/CMakeLists.txt
+@@ -169,13 +169,13 @@ if (MSVC)
+     )
+ endif ()
+ 
+-install(TARGETS ${PROJECT_NAME} DESTINATION .)
++include(GNUInstallDirs)
++
++install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ if (NOT APPLE)
+-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/data/resources/ DESTINATION resources)
++    install(DIRECTORY ${CMAKE_SOURCE_DIR}/data/resources/ DESTINATION "${CMAKE_INSTALL_DATADIR}/cytopia/resources")
+ endif ()
+ 
+-install(FILES ${CMAKE_SOURCE_DIR}/ReleaseNotes.txt ${CMAKE_SOURCE_DIR}/credits.txt DESTINATION .)
+-
+ if (APPLE)
+     set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE RESOURCE TRUE)
+ endif ()
