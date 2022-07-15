@@ -25,6 +25,21 @@ cleanup:
 modules:
   - shared-modules/glu/glu-9.json
 
+  - name: Boost
+    buildsystem: simple
+    build-commands:
+      - ./bootstrap.sh --prefix=/app
+      - ./b2 install --build-type=complete link=shared --layout=versioned runtime-link=shared cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $FLATPAK_BUILDER_N_JOBS
+    sources:
+      - type: archive
+        url: https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2
+        sha256: f0397ba6e982c4450f27bf32a2a83292aba035b827a5623a14636ea583318c41
+        x-checker-data:
+          type: anitya
+          project-id: 6845
+          stable-only: true
+          url-template: https://boostorg.jfrog.io/artifactory/main/release/$version/source/boost_${major}_${minor}_${patch}.tar.bz2
+
   - name: Micmac
     buildsystem: cmake
     builddir: true
@@ -43,7 +58,7 @@ modules:
       - -DWITH_HEADER_PRECOMP:BOOL=ON
       - -DWITH_IGN_IMAGE:BOOL=ON
       - -DWITH_IGN_ORI:BOOL=ON
-      - -DWITH_INTERFACE:BOOL=OFF
+      - -DWITH_INTERFACE:BOOL=ON
       - -DWITH_KAKADU:BOOL=OFF
       - -DWITH_OPENCL:BOOL=OFF
       - -DWITH_OPEN_MP:BOOL=OFF
@@ -58,6 +73,8 @@ modules:
         x-checker-data:
           type: git
           tag-pattern: ^(v[\d.]+)$
+      #- type: patch
+        #path: qt5_interface.patch
 
   - name: findbin
     buildsystem: simple
