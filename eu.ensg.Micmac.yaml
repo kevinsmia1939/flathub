@@ -1,0 +1,65 @@
+app-id: eu.ensg.Micmac
+runtime: org.kde.Platform
+sdk: org.kde.Sdk
+runtime-version: 5.15-21.08
+command: MICMAC
+#For CastXML
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.llvm13
+# GLEW does not support Wayland yet.
+#build-options:
+  #cflags: -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -funwind-tables -fasynchronous-unwind-tables -fstack-clash-protection
+  #cxxflags: -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -funwind-tables -fasynchronous-unwind-tables -fstack-clash-protection
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --device=dri
+  - --filesystem=home
+cleanup:
+  #- /include
+  #- /lib/cmake
+  #- /share/doc
+  - '*.la'
+  - '*.a'
+
+modules:
+  - shared-modules/glu/glu-9.json
+
+  - name: Micmac
+    buildsystem: cmake
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE:STRING=Release
+      - -DCMAKE_INSTALL_PREFIX=/app
+      - -DBUILD_PATH_BIN=/app/bin
+      - -DBUILD_PATH_LIB=/app/lib
+      - -DWERROR:BOOL=OFF
+      - -DWITH_CCACHE:BOOL=ON
+      - -DWITH_CPP11:BOOL=ON
+      - -DWITH_DOXYGEN:BOOL=OFF
+      - -DWITH_ETALONPOLY:BOOL=ON
+      - -DWITH_GIMMI:BOOL=ON
+      - -DWITH_GRAPHVIZ:BOOL=OFF
+      - -DWITH_HEADER_PRECOMP:BOOL=ON
+      - -DWITH_IGN_IMAGE:BOOL=ON
+      - -DWITH_IGN_ORI:BOOL=ON
+      - -DWITH_INTERFACE:BOOL=OFF
+      - -DWITH_KAKADU:BOOL=OFF
+      - -DWITH_OPENCL:BOOL=OFF
+      - -DWITH_OPEN_MP:BOOL=OFF
+      - -DWITH_QT5:BOOL=ON
+    post-install:
+      - ls -l $FLATPAK_BUILDER_BUILDDIR
+    sources:
+      - type: git
+        url: https://github.com/micmacIGN/micmac.git
+        commit: master
+        #commit: f5bb010a4a5d9de63a287e012de37f1f49fdbd15
+        x-checker-data:
+          type: git
+          tag-pattern: ^(v[\d.]+)$
+
+  - name: findbin
+    buildsystem: simple
+    build-commands:
+      - ls -l /app/bin
