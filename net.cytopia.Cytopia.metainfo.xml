@@ -48,22 +48,10 @@
         <screenshot>
             <image>https://camo.githubusercontent.com/7959cc902e29e1b1fa072c5c8e6f5437b5ff61ca320e64c01eb9d472a26440bb/68747470733a2f2f6379746f7069612e6e65742f6769746875622f53637265656e73686f74322e6a7067</image>
         </screenshot>
-        <screenshot>
-            <image>https://www.knime.com/sites/default/files/styles/inline_large/public/highlighting_small.png?itok=ul2qEDlg</image>
-        </screenshot>
-        <screenshot>
-            <image>https://www.knime.com/sites/default/files/styles/inline_large/public/molecules_small.png?itok=NI_3cnsr</image>
-        </screenshot>
-        <screenshot>
-            <image>https://www.knime.com/sites/default/files/styles/inline_large/public/metaflow_small.png?itok=uzVz_RP6</image>
-        </screenshot>
-        <screenshot>
-            <image>https://www.knime.com/sites/default/files/styles/inline_large/public/external_small.png?itok=DneYbunI</image>
-        </screenshot>
     </screenshots>
     <content_rating type="oars-1.1"/>
     <releases>
-        <release version="4.6.0" date="2022-06-22">
+        <release version="0.2.1" date="2020-04-14">
         </release>    
     </releases>
 </component>
