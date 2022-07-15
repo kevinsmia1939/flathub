@@ -1,0 +1,144 @@
+app-id: net.cytopia.Cytopia
+runtime: org.freedesktop.Platform
+sdk: org.freedesktop.Sdk
+runtime-version: '21.08'
+command: Cytopia
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --socket=pulseaudio
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig
+  - '*.la'
+  - '*.a'
+modules:
+
+  - name: SDL2
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+    - type: archive
+      url: https://github.com/libsdl-org/SDL/archive/refs/tags/release-2.0.20.tar.gz
+      sha256: 2a026753af9b03fca043824bca8341f74921a836d28729e0c31aa262202a83c6
+    cleanup:
+      - /lib/*.a
+      - /lib/*.la
+
+  - name: SDL2-ttf
+    buildsystem: cmake-ninja
+    builddir: true
+    build-options:
+      env:
+        CFLAGS: -lfreetype
+    config-options:
+      - -DBUILD_SHARED_LIBS=ON
+    sources:
+    - type: archive
+      url: https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/release-2.0.18.tar.gz
+      sha256: 6b61544441b72bdfa1ced89034c6396fe80228eff201eb72c5f78e500bb80bd0
+    cleanup:
+      - /lib/*.a
+      - /lib/*.la
+
+  - name: SDL_image
+    rm-configure: true
+    config-opts:
+      - --disable-static
+    cleanup:
+      - /bin
+      - /include
+      - /lib/pkgconfig
+      - /share
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL_image
+        tag: release-2.0.5
+        commit: ab2a9c602623193d61827ccd395302d92d90fc38
+      - type: script
+        dest-filename: autogen.sh
+        commands:
+          - "AUTOMAKE=\"automake --foreign\" autoreconf -vfi"
+    cleanup:
+      - /lib/*.a
+      - /lib/*.la
+
+  - name: libnoise
+    buildsystem: simple
+    build-commands:
+      - sed -i 's,\(--mode=\(compile\|link\)\) \$(\(CC\|CXX\)),--tag=\3 &,' `find . -name Makefile`
+      - cd src && make
+      - make
+      - rm include/Makefile
+      - mkdir -p /app/include/noise/ && cp -R include/* /app/include/noise/
+      - mkdir -p /app/lib && cp lib/libnoise.so.0.3 /app/lib
+    sources:
+      - type: archive
+        url: https://sourceforge.net/projects/libnoise/files/libnoise%20sources/1.0.0/libnoisesrc-1.0.0.zip
+        sha256: 34ed402f43f30ce5e39812642c9533c11082cd2bc092341c65160f5c743be95b
+      - type: patch
+        path: libnoise-make.patch
+        strip-components: 0
+      - type: shell
+        commands:
+          - sed -i 's,\(--mode=\(compile\|link\)\) \$(\(CC\|CXX\)),--tag=\3 &,' `find . -name Makefile`
+
+  - name: angelscript
+    buildsystem: meson
+    subdir: angelscript/projects/meson
+    sources:
+      - type: archive
+        url: https://www.angelcode.com/angelscript/sdk/files/angelscript_2.35.1.zip
+        sha256: 5c1096b6d6cf50c7e77ae93c736d35b69b07b1e5047161c7816bca25b413a18b
+    cleanup:
+      - /lib/*.a
+      - /lib/*.la
+
+  - name: SDL2-mixer
+    config-opts:
+      - --disable-static
+    sources:
+    - type: archive
+      url: https://github.com/libsdl-org/SDL_mixer/archive/refs/tags/release-2.0.4.tar.gz
+      sha256: 5605b6f230717acf6d09549671f7fe03f006700c61a61b86042888f81792e2b3
+    cleanup:
+      - /lib/*.a
+      - /lib/*.la
+
+  - name: remove-static-lib
+    buildsystem: simple
+    build-commands:
+      - ls -l /app/lib
+      - rm -r /app/lib/{*.a,*.la}
+
+  - name: Cytopia
+    buildsystem: simple
+    build-commands:
+      - mkdir build
+      - mkdir ${FLATPAK_DEST}/share/Cytopia
+      - mv _cmcm-modules build
+      - cd build && cmake -DBUILD_TEST=OFF -DCYTOPIA_FORCE_SYSTEM_DEPENDENCIES=ON -DLibNoise_LIBRARY=/app/lib/libnoise.so.0 -DLibNoise_INCLUDE_DIR=/app/include/noise ..
+      - cd build && cmake --build .
+      - cd build && cmake --build . --target install
+      - cp -r build/redist/resources ${FLATPAK_DEST}/bin
+      - install -Dm0744 build/redist/Cytopia ${FLATPAK_DEST}/bin
+      - install -Dm0644 build/redist/{credits.txt,ReleaseNotes.txt} ${FLATPAK_DEST}/share/Cytopia
+      - install -Dm0644 build/redist/resources/images/app_icons/cytopia_icon_iso.png /app/share/icons/hicolor/62x62/apps/${FLATPAK_ID}.png
+      - install -Dm0644 ${FLATPAK_ID}.desktop ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+      - install -Dm0644 ${FLATPAK_ID}.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
+    sources:
+      - type: git
+        url: https://github.com/CytopiaTeam/Cytopia.git
+        tag: master
+        # pre-generate _cmcm-modules is required to build without network
+        # Use cmcm-modules.sh to generate it
+      - type: dir
+        path: _cmcm-modules
+        dest: _cmcm-modules
+      - type: file
+        path: net.cytopia.Cytopia.desktop
+      - type: file
+        path: net.cytopia.Cytopia.metainfo.xml
