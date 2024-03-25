@@ -1,0 +1,19 @@
+app-id: info.gnuplot.Gnuplot
+runtime: org.kde.Platform
+runtime-version: 5.15-23.08
+sdk: org.kde.Sdk
+command: gnuplot
+add-extensions:
+  org.kde.Platform:
+    directory: /bin
+    version: '23.08'
+modules:
+  - name: gnuplot
+    sources:
+      - type: archive
+        url: https://sourceforge.net/projects/gnuplot/files/gnuplot/6.0.0/gnuplot-6.0.0.tar.gz
+        sha256: 635a28f0993f6ab0d1179e072ad39b8139d07f51237f841d93c6c2ff4b1758ec
+        x-checker-data:
+          type: anitya
+          project-id: 1216
+          url-template: https://sourceforge.net/projects/gnuplot/files/gnuplot/$version/gnuplot-$version.tar.gz
