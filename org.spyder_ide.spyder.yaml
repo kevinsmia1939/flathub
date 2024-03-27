@@ -88,6 +88,21 @@ modules:
 
   - spyder_deps_numerical.json
 
+  - name: python-scipy
+    buildsystem: simple
+    build-options:
+      ldflags: -lgfortran
+    build-commands:
+      - pip3 install --no-index --find-links=file://${PWD} --prefix=${FLATPAK_DEST}
+        --no-build-isolation .
+    sources:
+      - type: archive
+        url: https://files.pythonhosted.org/packages/30/85/cdbf2c3c460fe5aae812917866392068a88d02f07de0fe31ce738734c477/scipy-1.12.0.tar.gz
+        sha256: 4bf5abab8a36d20193c698b0f1fc282c1d083c94723902c447e5d2f1780936a3
+        x-checker-data:
+          type: pypi
+          name: scipy
+
   - name: python3-matplotlib
     buildsystem: simple
     build-commands:
