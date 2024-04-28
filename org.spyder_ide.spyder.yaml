@@ -29,8 +29,8 @@ modules:
       - -DDYNAMIC_ARCH:BOOL=ON
     sources:
       - type: archive
-        url: https://github.com/xianyi/OpenBLAS/archive/v0.3.26.tar.gz
-        sha256: 4e6e4f5cb14c209262e33e6816d70221a2fe49eb69eaf0a06f065598ac602c68
+        url: https://github.com/xianyi/OpenBLAS/archive/v0.3.27.tar.gz
+        sha256: aa2d68b1564fe2b13bc292672608e9cdeeeb6dc34995512e65c3b10f4599e897
         x-checker-data:
           type: anitya
           project-id: 2540
@@ -97,8 +97,8 @@ modules:
         --no-build-isolation .
     sources:
       - type: archive
-        url: https://files.pythonhosted.org/packages/30/85/cdbf2c3c460fe5aae812917866392068a88d02f07de0fe31ce738734c477/scipy-1.12.0.tar.gz
-        sha256: 4bf5abab8a36d20193c698b0f1fc282c1d083c94723902c447e5d2f1780936a3
+        url: https://files.pythonhosted.org/packages/fb/a3/328965862f41ba67d27ddd26205962007ec87d99eec6d364a29bf00ac093/scipy-1.13.0.tar.gz
+        sha256: 58569af537ea29d3f78e5abd18398459f195546bb3be23d16677fb26616cc11e
         x-checker-data:
           type: pypi
           name: scipy
@@ -118,8 +118,8 @@ modules:
         url: http://www.qhull.org/download/qhull-2020-src-8.0.2.tgz
         sha256: b5c2d7eb833278881b952c8a52d20179eab87766b00b865000469a45c1838b7e
       - type: archive
-        url: https://files.pythonhosted.org/packages/9a/aa/607a121331d5323b164f1c0696016ccc9d956a256771c4d91e311a302f13/matplotlib-3.8.3.tar.gz
-        sha256: 7b416239e9ae38be54b028abbf9048aff5054a9aba5416bef0bd17f9162ce161
+        url: https://files.pythonhosted.org/packages/38/4f/8487737a74d8be4ab5fbe6019b0fae305c1604cf7209500969b879b5f462/matplotlib-3.8.4.tar.gz
+        sha256: 8aac397d5e9ec158960e31c381c5ffc52ddd52bd9a47717e2a694038167dffea
         x-checker-data:
           type: pypi
           name: matplotlib
@@ -144,8 +144,8 @@ modules:
         --no-build-isolation .
     sources:
       - type: archive
-        url: https://files.pythonhosted.org/packages/60/fc/1779454d6fb22dcda94c2b892bdc40cfd448007a68ee57935b491891707b/python-lsp-server-1.10.1.tar.gz
-        sha256: ec4c5706af67a265a19173fe4beb3b0a2c1626fa33a15ea952c2f288798b8c0d
+        url: https://files.pythonhosted.org/packages/5e/58/835ce6e458317324a6c8a1fdd273659bd508d4c7967adca520e3d0b587f6/python-lsp-server-1.11.0.tar.gz
+        sha256: 89edd6fb3f7852e4bf5a3d1d95ea41484d1a28fa94b6e3cbff12b9db123b8e86
         x-checker-data:
           type: pypi
           name: python-lsp-server
@@ -162,11 +162,11 @@ modules:
     sources:
       - type: git
         url: https://github.com/spyder-ide/spyder
-        tag: v5.5.3
-        commit: 343aa408a56ee1aaf0d162b1613605676004959d
+        tag: v5.5.4
+        commit: eca9916d11d2318100ed3f096c2f9447845ac6d1
         x-checker-data:
-          type: pypi
-          name: spyder
+          type: git
+          tag-pattern: ^(v[\d.]+)$
       - type: patch
         path: fix_appdata.patch
 
