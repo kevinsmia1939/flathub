@@ -1,0 +1,98 @@
+diff -ruN a/CMake/vtkTargets/vtkOffscreen/CMakeLists.txt b/CMake/vtkTargets/vtkOffscreen/CMakeLists.txt
+--- a/CMake/vtkTargets/vtkOffscreen/CMakeLists.txt	2024-03-20 02:30:48.000000000 +0100
++++ b/CMake/vtkTargets/vtkOffscreen/CMakeLists.txt	2025-02-07 01:49:58.065709489 +0100
+@@ -51,23 +51,29 @@
+     get_filename_component(PY3ROOT ${PYTHON_LIBRARY} DIRECTORY) #lib
+     get_filename_component(PY3ROOT ${PY3ROOT} DIRECTORY) #root
+ 
++    find_package(dicom)
++    if (NOT dicom_FOUND)
++        message(STATUS "vtkdicom not found. Using pre-downloaded source.")
+ 
+-    ExternalProject_Add( vtkdicom-offscreen
+-       GIT_REPOSITORY "https://github.com/dgobbi/vtk-dicom"
+-       GIT_TAG 6a81888
+-       INSTALL_DIR ${CMAKE_BINARY_DIR}
+-       CMAKE_ARGS
+-         -DBUILD_SHARED_LIBS=ON
+-         -DBUILD_PYTHON_WRAPPERS=OFF
+-         -DCMAKE_BUILD_TYPE=Release
+-         -DVTK_DIR=${VTK_OFFSCREEN_DIR}
+-         -DPython3_ROOT_DIR=${PY3ROOT}
+-         -DVTK_VERSIONED_INSTALL=OFF
+-         -DDICOM_CUSTOM_LIBRARY_SUFFIX=pvisoffscreen
+-         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
++        set(VTK_DICOM_SOURCE_DIR "/app/sources/vtk-dicom")  # Adjust path if needed
++
++        ExternalProject_Add( vtkdicom-offscreen
++            SOURCE_DIR ${VTK_DICOM_SOURCE_DIR}  # Use local source
++            INSTALL_DIR ${CMAKE_BINARY_DIR}
++            CMAKE_ARGS
++                -DBUILD_SHARED_LIBS=ON
++                -DBUILD_PYTHON_WRAPPERS=OFF
++                -DCMAKE_BUILD_TYPE=Release
++                -DVTK_DIR=${VTK_OFFSCREEN_DIR}
++                -DPython3_ROOT_DIR=${PY3ROOT}
++                -DVTK_VERSIONED_INSTALL=OFF
++                -DDICOM_CUSTOM_LIBRARY_SUFFIX=pvisoffscreen
++                -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
++
++            BUILD_BYPRODUCTS <INSTALL_DIR>/lib/libvtkDICOM-pvisoffscreen.so.0.8.15
++        )
++    endif()
+ 
+-       BUILD_BYPRODUCTS <INSTALL_DIR>/lib/libvtkDICOM-pvisoffscreen.so.0.8.15
+-    )
+ 
+     ExternalProject_Get_Property( vtkdicom-offscreen INSTALL_DIR )
+     ExternalProject_Get_Property( vtkdicom-offscreen SOURCE_DIR )
+diff -ruN a/CMake/vtkTargets/vtkOnscreen/CMakeLists.txt b/CMake/vtkTargets/vtkOnscreen/CMakeLists.txt
+--- a/CMake/vtkTargets/vtkOnscreen/CMakeLists.txt	2024-03-20 02:30:48.000000000 +0100
++++ b/CMake/vtkTargets/vtkOnscreen/CMakeLists.txt	2025-02-07 01:37:17.059687949 +0100
+@@ -88,24 +88,28 @@
+   set(LIBNAME lib/libvtkDICOM-pvis.so.0.8.15)
+ endif()
+ 
+-ExternalProject_Add( vtkdicom-onscreen
+-   GIT_REPOSITORY "https://github.com/dgobbi/vtk-dicom"
+-   GIT_TAG 6a81888
+-   INSTALL_DIR ${CMAKE_BINARY_DIR}
+-   CMAKE_COMMAND ${CMAKE}
+-   CMAKE_ARGS
+-     -DBUILD_SHARED_LIBS=ON
+-     -DBUILD_PYTHON_WRAPPERS=OFF
+-     -DCMAKE_BUILD_TYPE=Release
+-     -DVTK_DIR=${VTK_ONSCREEN_DIR}
+-     -DPython3_ROOT_DIR=${PY3ROOT}
+-     -DVTK_VERSIONED_INSTALL=OFF
+-     -DDICOM_CUSTOM_LIBRARY_SUFFIX=pvis
+-     -DBUILD_PROGRAMS=OFF
+-     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
++find_package(dicom)
++if (NOT dicom_FOUND)
++  message(STATUS "vtkdicom not found")
++  ExternalProject_Add( vtkdicom-onscreen
++    GIT_REPOSITORY "https://github.com/dgobbi/vtk-dicom"
++    GIT_TAG 6a81888
++    INSTALL_DIR ${CMAKE_BINARY_DIR}
++    CMAKE_COMMAND ${CMAKE}
++    CMAKE_ARGS
++      -DBUILD_SHARED_LIBS=ON
++      -DBUILD_PYTHON_WRAPPERS=OFF
++      -DCMAKE_BUILD_TYPE=Release
++      -DVTK_DIR=${VTK_ONSCREEN_DIR}
++      -DPython3_ROOT_DIR=${PY3ROOT}
++      -DVTK_VERSIONED_INSTALL=OFF
++      -DDICOM_CUSTOM_LIBRARY_SUFFIX=pvis
++      -DBUILD_PROGRAMS=OFF
++      -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+ 
+-   BUILD_BYPRODUCTS <INSTALL_DIR>/${LIBNAME}
+-)
++    BUILD_BYPRODUCTS <INSTALL_DIR>/${LIBNAME}
++  )
++endif()
+ 
+ ExternalProject_Get_Property( vtkdicom-onscreen INSTALL_DIR )
+ ExternalProject_Get_Property( vtkdicom-onscreen SOURCE_DIR )
+Binary files a/CMake/vtkTargets/vtkOnscreen/.CMakeLists.txt.kate-swp and b/CMake/vtkTargets/vtkOnscreen/.CMakeLists.txt.kate-swp differ

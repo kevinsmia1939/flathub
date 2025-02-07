@@ -1,0 +1,230 @@
+app-id: de.silentdynamics.InsightCAE
+runtime: org.kde.Sdk
+sdk: org.kde.Sdk
+runtime-version: 5.15-24.08
+# base: io.qt.qtwebengine.BaseApp
+base-version: 5.15-24.08
+rename-icon: paraview
+command: paraview
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --device=dri
+  - --share=network
+  - --filesystem=home
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig
+  - /share/doc
+  - /share/man
+  - /etc
+  - '*.la'
+  - '*.a'
+
+build-options:
+    cxxflags: -std=gnu++14
+modules:
+  - name: Armadillo
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: archive
+        url: https://sourceforge.net/projects/arma/files/armadillo-14.2.3.tar.xz
+        sha256: fc70c3089a8d2bb7f2510588597d4b35b4323f6d4be5db5c17c6dba20ab4a9cc
+
+  - name: GSL
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://ftp.gnu.org/gnu/gsl/gsl-2.8.tar.gz
+        sha256: 6a99eeed15632c6354895b1dd542ed5a855c0f15d9ad1326c6fe2b2c9e423190
+
+  - name: Boost
+    buildsystem: simple
+    build-commands:
+      - ./bootstrap.sh --prefix=/app
+      - ./b2 install cxxstd=14 cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $FLATPAK_BUILDER_N_JOBS
+    sources:
+      - type: archive
+        url: https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.gz
+        sha256: 4b2136f98bdd1f5857f1c3dea9ac2018effe65286cf251534b6ae20cc45e1847
+        x-checker-data:
+          type: anitya
+          project-id: 6845
+          stable-only: true
+          url-template: https://boostorg.jfrog.io/artifactory/main/release/${version}/source/boost_${major}_${minor}_${patch}.tar.bz2
+
+  - name: VTK
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DBUILD_SHARED_LIBS=ON
+      - -DBUILD_TESTING:BOOL=OFF
+      - -DVTK_GROUP_ENABLE_Qt:BOOL=YES
+      - -DVTK_BUILD_COMPILE_TOOLS_ONLY:BOOL=OFF
+    sources:
+      - type: archive
+        url: https://www.vtk.org/files/release/9.4/VTK-9.4.1.tar.gz
+        sha256: c253b0c8d002aaf98871c6d0cb76afc4936c301b72358a08d5f3f72ef8bc4529
+
+  - name: opencascade
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DUSE_VTK=ON
+      - -DBUILD_DOC_Overview=OFF
+      - -D3RDPARTY_VTK_INCLUDE_DIR=/app/include/vtk-9.4/
+    sources:
+      - type: git
+        url: https://github.com/Open-Cascade-SAS/OCCT
+        tag: V7_8_1
+        commit: bd2a789f15235755ce4d1a3b07379a2e062fdc2e
+      - type: patch
+        path: freetype_use_unsigned_point_and_contour.patch
+
+  - name: dxflib
+    buildsystem: simple
+    build-commands:
+      - qmake dxflib.pro && make
+      - mkdir -p /app/include/dxflib
+      - cp src/* /app/include/dxflib
+      - cp *.o libdxflib.a /app/lib/
+    sources:
+      - type: archive
+        url: https://qcad.org/archives/dxflib/dxflib-3.26.4-src.tar.gz
+        sha256: 507db4954b50ac521cbb2086553bf06138dc89f55196a8ba22771959c760915f
+
+  - name: SWIG
+    sources:
+      - type: archive
+        url: https://sourceforge.net/projects/swig/files/swig/swig-4.3.0/swig-4.3.0.tar.gz
+        sha256: f7203ef796f61af986c70c05816236cbd0d31b7aa9631e5ab53020ab7804aa9e
+
+  - name: poppler
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DENABLE_QT6=OFF
+    sources:
+      - type: archive
+        url: https://poppler.freedesktop.org/poppler-25.02.0.tar.xz
+        sha256: 21234cb2a9647d73c752ce4031e65a79d11a511a835f2798284c2497b8701dee
+        x-checker-data:
+          type: anitya
+          project-id: 3686
+          url-template: https://poppler.freedesktop.org/poppler-$version.tar.xz
+
+  - name: minizip
+    subdir: contrib/minizip
+    sources:
+        - type: git
+          url: https://github.com/madler/zlib
+          tag: v1.3.1
+          commit: 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
+        - type: script
+          dest: contrib/minizip/
+          dest-filename: autogen.sh
+          commands:
+            - autoreconf -ifv
+
+  - name: VTK-DICOM
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DBUILD_SHARED_LIBS=ON
+      - -DBUILD_PYTHON_WRAPPERS=OFF
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DVTK_VERSIONED_INSTALL=OFF
+      - -DDICOM_CUSTOM_LIBRARY_SUFFIX=pvis
+    sources:
+      - type: git
+        url: https://github.com/dgobbi/vtk-dicom
+        commit: 33d3f1cd2223a60a58ca0ca42face5315d69f7ca
+
+  - name: openmpi
+    cleanup:
+      - /bin
+    sources:
+      - type: archive
+        url: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.bz2
+        sha256: 92912e175fd1234368c8730c03f4996fe5942e7479bb1d10059405e7f2b3930d
+
+- name: OpenFOAM-v2412
+  buildsystem: simple
+  build-options:
+    env:
+      WM_PROJECT_DIR: /run/build/OpenFOAM
+      WM_MPLIB: SYSTEMOPENMPI
+  build-commands:
+    - export WM_PROJECT_DIR=/run/build/OpenFOAM && source etc/bashrc && ./Allwmake -j
+    - install -d /app/lib/openfoam
+    - mv bin /app/lib/openfoam/openfoam2412/
+    - mv etc /app/lib/openfoam/openfoam2412/
+    - mv platforms /app/lib/openfoam/openfoam2412/
+    - mv META-INFO /app/lib/openfoam/openfoam2412/
+    - mv applications /app/lib/openfoam/openfoam2412/
+    - mv src /app/lib/openfoam/openfoam2412/
+    - mv wmake /app/lib/openfoam/openfoam2412/
+    - mv doc /app/lib/openfoam/openfoam2412/
+    # Setup OpenFOAM environment
+    - echo "export FOAM_INST_DIR=/app/lib/openfoam/openfoam2412" > /app/etc/profile.d/openfoam.sh
+    - echo "export PATH=/app/lib/openfoam/openfoam2412/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
+    - echo "export WM_MPLIB=SYSTEMOPENMPI" >> /app/etc/profile.d/openfoam.sh
+    - echo "export MPI_ROOT=/usr/lib/openmpi" >> /app/etc/profile.d/openfoam.sh
+    - echo "export PATH=/usr/lib/openmpi/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
+    - echo "export LD_LIBRARY_PATH=/usr/lib/openmpi/lib:\$LD_LIBRARY_PATH" >> /app/etc/profile.d/openfoam.sh
+    - echo "alias ofoam='source /app/lib/openfoam/openfoam2412/etc/bashrc'" >> /app/etc/profile.d/openfoam.sh
+    - chmod 755 /app/etc/profile.d/openfoam.sh
+    # Create OpenFOAM wrapper script
+    - echo "#!/bin/sh" > /app/bin/openfoam
+    - echo "source /app/etc/profile.d/openfoam.sh" >> /app/bin/openfoam
+    - echo "exec \"\$@\"" >> /app/bin/openfoam
+    - chmod +x /app/bin/openfoam
+  sources:
+    - type: archive
+      url: https://dl.openfoam.com/source/v2412/OpenFOAM-v2412.tgz
+      sha256: f113183a4d027c93939212af8967053c5f8fe76fb62e5848cb11bbcf8e829552
+
+  modules:
+    - name: dependencies
+      buildsystem: simple
+      build-commands: []
+      sources:
+        - type: package
+          packages:
+            - gcc
+            - gcc-c++
+            - flex
+            - make
+            - m4
+            - zlib-devel
+            - readline-devel
+            - boost-devel
+            - fftw3-devel
+            - ncurses-devel
+            - openmpi
+            - metis
+            - scotch
+            - ptscotch
+            - cgal
+
+
+  - name: InsightCAE
+    buildsystem: cmake-ninja
+    builddir: true
+    build-options:
+      cxxflags: -std=gnu++14
+    config-opts:
+      - -DXFLIB_INCLUDE_DIR=/app/include/dxflib
+      - -Wno-dev
+    sources:
+      - type: git
+        url: https://github.com/hkroeger/insightcae
+        commit: edf294912fe15fb61cef8aa3e7d1265b32a2461a
+      # - type: patch
+      #   path: vtkdicom.patch
+      # - type: git
+      #   url: https://github.com/dgobbi/vtk-dicom
+      #   commit: 33d3f1cd2223a60a58ca0ca42face5315d69f7ca
+      #   dest: dicom
+
