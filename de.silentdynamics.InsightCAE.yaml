@@ -149,65 +149,41 @@ modules:
         url: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.bz2
         sha256: 92912e175fd1234368c8730c03f4996fe5942e7479bb1d10059405e7f2b3930d
 
-- name: OpenFOAM-v2412
-  buildsystem: simple
-  build-options:
-    env:
-      WM_PROJECT_DIR: /run/build/OpenFOAM
-      WM_MPLIB: SYSTEMOPENMPI
-  build-commands:
-    - export WM_PROJECT_DIR=/run/build/OpenFOAM && source etc/bashrc && ./Allwmake -j
-    - install -d /app/lib/openfoam
-    - mv bin /app/lib/openfoam/openfoam2412/
-    - mv etc /app/lib/openfoam/openfoam2412/
-    - mv platforms /app/lib/openfoam/openfoam2412/
-    - mv META-INFO /app/lib/openfoam/openfoam2412/
-    - mv applications /app/lib/openfoam/openfoam2412/
-    - mv src /app/lib/openfoam/openfoam2412/
-    - mv wmake /app/lib/openfoam/openfoam2412/
-    - mv doc /app/lib/openfoam/openfoam2412/
-    # Setup OpenFOAM environment
-    - echo "export FOAM_INST_DIR=/app/lib/openfoam/openfoam2412" > /app/etc/profile.d/openfoam.sh
-    - echo "export PATH=/app/lib/openfoam/openfoam2412/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
-    - echo "export WM_MPLIB=SYSTEMOPENMPI" >> /app/etc/profile.d/openfoam.sh
-    - echo "export MPI_ROOT=/usr/lib/openmpi" >> /app/etc/profile.d/openfoam.sh
-    - echo "export PATH=/usr/lib/openmpi/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
-    - echo "export LD_LIBRARY_PATH=/usr/lib/openmpi/lib:\$LD_LIBRARY_PATH" >> /app/etc/profile.d/openfoam.sh
-    - echo "alias ofoam='source /app/lib/openfoam/openfoam2412/etc/bashrc'" >> /app/etc/profile.d/openfoam.sh
-    - chmod 755 /app/etc/profile.d/openfoam.sh
-    # Create OpenFOAM wrapper script
-    - echo "#!/bin/sh" > /app/bin/openfoam
-    - echo "source /app/etc/profile.d/openfoam.sh" >> /app/bin/openfoam
-    - echo "exec \"\$@\"" >> /app/bin/openfoam
-    - chmod +x /app/bin/openfoam
-  sources:
-    - type: archive
-      url: https://dl.openfoam.com/source/v2412/OpenFOAM-v2412.tgz
-      sha256: f113183a4d027c93939212af8967053c5f8fe76fb62e5848cb11bbcf8e829552
-
-  modules:
-    - name: dependencies
-      buildsystem: simple
-      build-commands: []
-      sources:
-        - type: package
-          packages:
-            - gcc
-            - gcc-c++
-            - flex
-            - make
-            - m4
-            - zlib-devel
-            - readline-devel
-            - boost-devel
-            - fftw3-devel
-            - ncurses-devel
-            - openmpi
-            - metis
-            - scotch
-            - ptscotch
-            - cgal
-
+  - name: OpenFOAM-v2412
+    buildsystem: simple
+    build-options:
+        env:
+        WM_PROJECT_DIR: /run/build/OpenFOAM
+        WM_MPLIB: SYSTEMOPENMPI
+    build-commands:
+        - export WM_PROJECT_DIR=/run/build/OpenFOAM && source etc/bashrc && ./Allwmake -j
+        - install -d /app/lib/openfoam
+        - mv bin /app/lib/openfoam/openfoam2412/
+        - mv etc /app/lib/openfoam/openfoam2412/
+        - mv platforms /app/lib/openfoam/openfoam2412/
+        - mv META-INFO /app/lib/openfoam/openfoam2412/
+        - mv applications /app/lib/openfoam/openfoam2412/
+        - mv src /app/lib/openfoam/openfoam2412/
+        - mv wmake /app/lib/openfoam/openfoam2412/
+        - mv doc /app/lib/openfoam/openfoam2412/
+        # Setup OpenFOAM environment
+        - echo "export FOAM_INST_DIR=/app/lib/openfoam/openfoam2412" > /app/etc/profile.d/openfoam.sh
+        - echo "export PATH=/app/lib/openfoam/openfoam2412/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
+        - echo "export WM_MPLIB=SYSTEMOPENMPI" >> /app/etc/profile.d/openfoam.sh
+        - echo "export MPI_ROOT=/usr/lib/openmpi" >> /app/etc/profile.d/openfoam.sh
+        - echo "export PATH=/usr/lib/openmpi/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
+        - echo "export LD_LIBRARY_PATH=/usr/lib/openmpi/lib:\$LD_LIBRARY_PATH" >> /app/etc/profile.d/openfoam.sh
+        - echo "alias ofoam='source /app/lib/openfoam/openfoam2412/etc/bashrc'" >> /app/etc/profile.d/openfoam.sh
+        - chmod 755 /app/etc/profile.d/openfoam.sh
+        # Create OpenFOAM wrapper script
+        - echo "#!/bin/sh" > /app/bin/openfoam
+        - echo "source /app/etc/profile.d/openfoam.sh" >> /app/bin/openfoam
+        - echo "exec \"\$@\"" >> /app/bin/openfoam
+        - chmod +x /app/bin/openfoam
+    sources:
+      - type: archive
+        url: https://dl.openfoam.com/source/v2412/OpenFOAM-v2412.tgz
+        sha256: c353930105c39b75dac7fa7cfbfc346390caa633a868130fd8c9816ef5f732cd
 
   - name: InsightCAE
     buildsystem: cmake-ninja
