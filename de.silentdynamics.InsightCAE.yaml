@@ -188,8 +188,6 @@ modules:
     config-opts:
       - -DXFLIB_INCLUDE_DIR=/app/include/dxflib
       - -Wno-dev
-    build-args:
-      - --share=network
     sources:
       - type: git
         url: https://github.com/hkroeger/insightcae
