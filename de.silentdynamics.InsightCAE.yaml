@@ -22,23 +22,23 @@ cleanup:
   - '*.la'
   - '*.a'
 
-build-options:
-    cxxflags: -std=gnu++14
+# build-options:
+#     cxxflags: -std=gnu++14
 modules:
   - name: Armadillo
     buildsystem: cmake-ninja
     builddir: true
     sources:
       - type: archive
-        url: https://sourceforge.net/projects/arma/files/armadillo-14.2.3.tar.xz
-        sha256: fc70c3089a8d2bb7f2510588597d4b35b4323f6d4be5db5c17c6dba20ab4a9cc
+        url: https://gitlab.com/conradsnicta/armadillo-code/-/archive/9.900.x/armadillo-code-9.900.x.tar.gz
+        sha256: 40519374d2f2fd94308f19a86b325b7aea5b4701fdccef8d0d80624471f401c2
 
   - name: GSL
     buildsystem: autotools
     sources:
       - type: archive
-        url: https://ftp.gnu.org/gnu/gsl/gsl-2.8.tar.gz
-        sha256: 6a99eeed15632c6354895b1dd542ed5a855c0f15d9ad1326c6fe2b2c9e423190
+        url: https://ftp.gnu.org/gnu/gsl/gsl-2.6.tar.gz
+        sha256: b782339fc7a38fe17689cb39966c4d821236c28018b6593ddb6fd59ee40786a8
 
   - name: Boost
     buildsystem: simple
@@ -47,13 +47,8 @@ modules:
       - ./b2 install cxxstd=14 cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $FLATPAK_BUILDER_N_JOBS
     sources:
       - type: archive
-        url: https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.gz
-        sha256: 4b2136f98bdd1f5857f1c3dea9ac2018effe65286cf251534b6ae20cc45e1847
-        x-checker-data:
-          type: anitya
-          project-id: 6845
-          stable-only: true
-          url-template: https://boostorg.jfrog.io/artifactory/main/release/${version}/source/boost_${major}_${minor}_${patch}.tar.bz2
+        url: https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz
+        sha256: f55c340aa49763b1925ccf02b2e83f35fdcf634c9d5164a2acb87540173c741d
 
   - name: VTK
     buildsystem: cmake-ninja
@@ -63,6 +58,7 @@ modules:
       - -DBUILD_TESTING:BOOL=OFF
       - -DVTK_GROUP_ENABLE_Qt:BOOL=YES
       - -DVTK_BUILD_COMPILE_TOOLS_ONLY:BOOL=OFF
+      - -DVTK_DEFAULT_RENDER_WINDOW_OFFSCREEN:BOOL=ON
     sources:
       - type: archive
         url: https://www.vtk.org/files/release/9.4/VTK-9.4.1.tar.gz
@@ -78,8 +74,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/Open-Cascade-SAS/OCCT
-        tag: V7_8_1
-        commit: bd2a789f15235755ce4d1a3b07379a2e062fdc2e
+        tag: V7_4_0p2
+        commit: 85f78ac11072de6694d3a60343640bb7eef90526
       - type: patch
         path: freetype_use_unsigned_point_and_contour.patch
 
@@ -92,8 +88,8 @@ modules:
       - cp *.o libdxflib.a /app/lib/
     sources:
       - type: archive
-        url: https://qcad.org/archives/dxflib/dxflib-3.26.4-src.tar.gz
-        sha256: 507db4954b50ac521cbb2086553bf06138dc89f55196a8ba22771959c760915f
+        url: https://www.qcad.org/archives/dxflib/dxflib-3.7.5-src.tar.gz
+        sha256: 3c76aa8f8c8491900458980daf500b55ae7d015e71f23ae3d0cfcd6c87deccd5
 
   - name: SWIG
     sources:
@@ -149,58 +145,58 @@ modules:
         url: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.bz2
         sha256: 92912e175fd1234368c8730c03f4996fe5942e7479bb1d10059405e7f2b3930d
 
-  - name: OpenFOAM-v2412
-    buildsystem: simple
-    build-options:
-        env:
-        WM_PROJECT_DIR: /run/build/OpenFOAM
-        WM_MPLIB: SYSTEMOPENMPI
-    build-commands:
-        - export WM_PROJECT_DIR=/run/build/OpenFOAM && source etc/bashrc && ./Allwmake -j
-        - install -d /app/lib/openfoam
-        - mv bin /app/lib/openfoam/openfoam2412/
-        - mv etc /app/lib/openfoam/openfoam2412/
-        - mv platforms /app/lib/openfoam/openfoam2412/
-        - mv META-INFO /app/lib/openfoam/openfoam2412/
-        - mv applications /app/lib/openfoam/openfoam2412/
-        - mv src /app/lib/openfoam/openfoam2412/
-        - mv wmake /app/lib/openfoam/openfoam2412/
-        - mv doc /app/lib/openfoam/openfoam2412/
-        # Setup OpenFOAM environment
-        - echo "export FOAM_INST_DIR=/app/lib/openfoam/openfoam2412" > /app/etc/profile.d/openfoam.sh
-        - echo "export PATH=/app/lib/openfoam/openfoam2412/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
-        - echo "export WM_MPLIB=SYSTEMOPENMPI" >> /app/etc/profile.d/openfoam.sh
-        - echo "export MPI_ROOT=/usr/lib/openmpi" >> /app/etc/profile.d/openfoam.sh
-        - echo "export PATH=/usr/lib/openmpi/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
-        - echo "export LD_LIBRARY_PATH=/usr/lib/openmpi/lib:\$LD_LIBRARY_PATH" >> /app/etc/profile.d/openfoam.sh
-        - echo "alias ofoam='source /app/lib/openfoam/openfoam2412/etc/bashrc'" >> /app/etc/profile.d/openfoam.sh
-        - chmod 755 /app/etc/profile.d/openfoam.sh
-        # Create OpenFOAM wrapper script
-        - echo "#!/bin/sh" > /app/bin/openfoam
-        - echo "source /app/etc/profile.d/openfoam.sh" >> /app/bin/openfoam
-        - echo "exec \"\$@\"" >> /app/bin/openfoam
-        - chmod +x /app/bin/openfoam
-    sources:
-      - type: archive
-        url: https://dl.openfoam.com/source/v2412/OpenFOAM-v2412.tgz
-        sha256: c353930105c39b75dac7fa7cfbfc346390caa633a868130fd8c9816ef5f732cd
+  # - name: OpenFOAM-v2412
+  #   buildsystem: simple
+  #   build-options:
+  #       env:
+  #       WM_PROJECT_DIR: /run/build/OpenFOAM
+  #       WM_MPLIB: SYSTEMOPENMPI
+  #   build-commands:
+  #       - export WM_PROJECT_DIR=/run/build/OpenFOAM && source etc/bashrc && ./Allwmake -j
+  #       - install -d /app/lib/openfoam
+  #       - mv bin /app/lib/openfoam/openfoam2412/
+  #       - mv etc /app/lib/openfoam/openfoam2412/
+  #       - mv platforms /app/lib/openfoam/openfoam2412/
+  #       - mv META-INFO /app/lib/openfoam/openfoam2412/
+  #       - mv applications /app/lib/openfoam/openfoam2412/
+  #       - mv src /app/lib/openfoam/openfoam2412/
+  #       - mv wmake /app/lib/openfoam/openfoam2412/
+  #       - mv doc /app/lib/openfoam/openfoam2412/
+  #       # Setup OpenFOAM environment
+  #       - install -d /app/etc/profile.d
+  #       - echo "export FOAM_INST_DIR=/app/lib/openfoam/openfoam2412" > /app/etc/profile.d/openfoam.sh
+  #       - echo "export PATH=/app/lib/openfoam/openfoam2412/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
+  #       - echo "export WM_MPLIB=SYSTEMOPENMPI" >> /app/etc/profile.d/openfoam.sh
+  #       - echo "export MPI_ROOT=/usr/lib/openmpi" >> /app/etc/profile.d/openfoam.sh
+  #       - echo "export PATH=/usr/lib/openmpi/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
+  #       - echo "export LD_LIBRARY_PATH=/usr/lib/openmpi/lib:\$LD_LIBRARY_PATH" >> /app/etc/profile.d/openfoam.sh
+  #       - echo "alias ofoam='source /app/lib/openfoam/openfoam2412/etc/bashrc'" >> /app/etc/profile.d/openfoam.sh
+  #       - chmod 755 /app/etc/profile.d/openfoam.sh
+  #       # Create OpenFOAM wrapper script
+  #       - echo "#!/bin/sh" > /app/bin/openfoam
+  #       - echo "source /app/etc/profile.d/openfoam.sh" >> /app/bin/openfoam
+  #       - echo "exec \"\$@\"" >> /app/bin/openfoam
+  #       - chmod +x /app/bin/openfoam
+  #   sources:
+  #     - type: archive
+  #       url: https://dl.openfoam.com/source/v2412/OpenFOAM-v2412.tgz
+  #       sha256: c353930105c39b75dac7fa7cfbfc346390caa633a868130fd8c9816ef5f732cd
 
   - name: InsightCAE
     buildsystem: cmake-ninja
     builddir: true
-    build-options:
-      cxxflags: -std=gnu++14
     config-opts:
       - -DXFLIB_INCLUDE_DIR=/app/include/dxflib
       - -Wno-dev
+    build-args:
+      - --share=network
     sources:
       - type: git
         url: https://github.com/hkroeger/insightcae
-        commit: edf294912fe15fb61cef8aa3e7d1265b32a2461a
-      # - type: patch
-      #   path: vtkdicom.patch
-      # - type: git
-      #   url: https://github.com/dgobbi/vtk-dicom
-      #   commit: 33d3f1cd2223a60a58ca0ca42face5315d69f7ca
-      #   dest: dicom
+        commit: 7d41a5555d0f8ed3e3b4233f2d1e11cac2c73f78
+        branch: next-release
+      - type: git
+        url: https://github.com/dgobbi/vtk-dicom
+        commit: 33d3f1cd2223a60a58ca0ca42face5315d69f7ca
+        dest: vtk-dicom
 
