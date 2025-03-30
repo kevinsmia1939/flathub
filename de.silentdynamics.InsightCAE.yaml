@@ -92,11 +92,11 @@ modules:
         url: https://www.qcad.org/archives/dxflib/dxflib-3.7.5-src.tar.gz
         sha256: 3c76aa8f8c8491900458980daf500b55ae7d015e71f23ae3d0cfcd6c87deccd5
 
-  # - name: SWIG
-  #   sources:
-  #     - type: archive
-  #       url: https://sourceforge.net/projects/swig/files/swig/swig-4.3.0/swig-4.3.0.tar.gz
-  #       sha256: f7203ef796f61af986c70c05816236cbd0d31b7aa9631e5ab53020ab7804aa9e
+  - name: SWIG
+    sources:
+      - type: archive
+        url: https://sourceforge.net/projects/swig/files/swig/swig-4.3.0/swig-4.3.0.tar.gz
+        sha256: f7203ef796f61af986c70c05816236cbd0d31b7aa9631e5ab53020ab7804aa9e
 
   - name: poppler
     buildsystem: cmake-ninja
