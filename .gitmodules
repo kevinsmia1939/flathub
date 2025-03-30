@@ -1,0 +1,3 @@
+[submodule "paraview/shared-modules"]
+	path = paraview/shared-modules
+	url = https://github.com/flathub/shared-modules.git

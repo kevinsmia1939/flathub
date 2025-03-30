@@ -1,0 +1,593 @@
+name: ParaView
+modules:
+  - shared-modules/glew/glew.json
+
+  - name: meson
+    buildsystem: simple
+    build-commands:
+      - python3 setup.py build
+      - python3 setup.py install --prefix=/app --root=/
+    sources:
+      - type: git
+        url: https://github.com/mesonbuild/meson.git
+        tag: 1.7.0
+        commit: 897b6fcdf9adfa87fe60f420e1b483f0f49af7a3
+        x-checker-data:
+          type: git
+          tag-pattern: ^([\d.]+)$
+
+  - name: OpenBLAS # dependency for numpy
+    no-autogen: true
+    make-args:
+      - DYNAMIC_ARCH=1
+      - DYNAMIC_OLDER=1
+      - FC=gfortran
+      - TARGET=GENERIC
+      - USE_OPENMP=0
+    make-install-args:
+      - PREFIX=/app
+    sources:
+      - type: archive
+        url: https://github.com/xianyi/OpenBLAS/archive/v0.3.29.tar.gz
+        sha256: 38240eee1b29e2bde47ebb5d61160207dc68668a54cac62c076bb5032013b1eb
+        x-checker-data:
+          type: anitya
+          project-id: 2540
+          url-template: https://github.com/xianyi/OpenBLAS/archive/v$version.tar.gz
+
+    # python3 flatpak-pip-generator setuptools_scm_git_archive flit-core tomli typing-extensions pyproject_metadata setuptools_scm meson-python numpy certifi pyparsing pillow packaging cppy kiwisolver fonttools cycler pybind11 contourpy python-dateutil pkgconfig pyparsing -o python-deps && fb
+  - python-deps.json
+
+  #Copy qhull and freetype to correct dir so matplotlib will not try to download it
+  - name: python3-matplotlib
+    buildsystem: simple
+    build-commands:
+      - mkdir -p subprojects/packagecache/
+      - cp qhull-8.0.2.tgz freetype-2.6.1.tar.gz subprojects/packagecache/ #Copy qhull and freetype to correct dir so matplotlib will not try to download it
+      - python3 -mpip install . --no-index --find-links=file://${PWD} --prefix=${FLATPAK_DEST}
+        --no-build-isolation
+    sources:
+      - type: file
+        url: https://download.savannah.gnu.org/releases/freetype/freetype-old/freetype-2.6.1.tar.gz
+        sha256: 0a3c7dfbda6da1e8fce29232e8e96d987ababbbf71ebc8c75659e4132c367014
+        dest-filename: freetype-2.6.1.tar.gz
+      - type: file
+        dest-filename: qhull-8.0.2.tgz
+        url: https://github.com/qhull/qhull/archive/v8.0.2/qhull-8.0.2.tar.gz
+        sha256: 8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b
+      - type: archive
+        url: https://files.pythonhosted.org/packages/68/dd/fa2e1a45fce2d09f4aea3cee169760e672c8262325aa5796c49d543dc7e6/matplotlib-3.10.0.tar.gz
+        sha256: b886d02a581b96704c9d1ffe55709e49b4d2d52709ccebc4be42db856e511278
+        x-checker-data:
+          type: pypi
+          name: matplotlib
+
+  - name: Boost
+    buildsystem: simple
+    build-commands:
+      - ./bootstrap.sh --prefix=/app
+      - ./b2 install cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $FLATPAK_BUILDER_N_JOBS
+    sources:
+      - type: archive
+        url: https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz
+        sha256: f55c340aa49763b1925ccf02b2e83f35fdcf634c9d5164a2acb87540173c741d
+        x-checker-data:
+          type: anitya
+          project-id: 6845
+          stable-only: true
+          url-template: https://archives.boost.io/release/${version}/source/boost_${major}_${minor}_${patch}.tar.gz
+
+  - name: hdf5
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DBUILD_TESTING:BOOL=OFF
+      - -DHDF5_BUILD_EXAMPLES:BOOL=OFF
+    sources:
+      - type: archive
+        url: https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5-1.14.6.tar.gz
+        sha256: 6df53f84376d87e96eeb255703e3b1a348fc08a48e06e37053f1bfb379970189
+        x-checker-data:
+          type: anitya
+          project-id: 1303
+          stable-only: true
+          url-template: https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5-${version}.tar.gz
+
+  - name: python-h5py
+    buildsystem: simple
+    build-commands:
+      - python3 -mpip install . --no-index --find-links=file://${PWD} --prefix=${FLATPAK_DEST}
+        --no-build-isolation
+    sources:
+      - type: archive
+        url: https://github.com/h5py/h5py/archive/refs/tags/3.13.0.tar.gz
+        sha256: d16d0f02e24aed3ba8eb59e406aa44a24f6295c4ad7d85ad4ec6bc0ea176a24e
+        x-checker-data:
+          type: anitya
+          project-id: 6409
+          stable-only: true
+          url-template: https://github.com/h5py/h5py/archive/refs/tags/${version}.tar.gz
+
+  - name: netcdf
+    sources:
+      - type: archive
+        url: https://github.com/Unidata/netcdf-c/archive/v4.9.3.tar.gz
+        sha256: 990f46d49525d6ab5dc4249f8684c6deeaf54de6fec63a187e9fb382cc0ffdff
+        x-checker-data:
+          type: anitya
+          project-id: 10354
+          stable-only: true
+          url-template: https://github.com/Unidata/netcdf-c/archive/v${version}.tar.gz
+
+  - name: openmpi
+    sources:
+      - type: archive
+        url: https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.7.tar.bz2
+        sha256: 119f2009936a403334d0df3c0d74d5595a32d99497f9b1d41e90019fee2fc2dd
+        x-checker-data:
+          type: anitya
+          project-id: 2554
+          stable-only: true
+          url-template: https://download.open-mpi.org/release/open-mpi/v${major}.${minor}/openmpi-${version}.tar.bz2
+
+  - name: TBB
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DTBB_TEST=OFF
+      - -DTBB_EXAMPLES=OFF
+      - -DTBB_STRICT=OFF
+    builddir: true
+    sources:
+      - type: archive
+        url: https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2022.0.0.tar.gz
+        sha256: e8e89c9c345415b17b30a2db3095ba9d47647611662073f7fbf54ad48b7f3c2a
+        x-checker-data:
+          type: anitya
+          project-id: 8217
+          stable-only: true
+          url-template: https://github.com/oneapi-src/oneTBB/archive/refs/tags/v$version.tar.gz
+
+  - name: Embree
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DEMBREE_TUTORIALS:BOOL=OFF
+      - -DEMBREE_ISPC_SUPPORT:BOOL=ON
+    sources:
+      - type: archive
+        url: https://github.com/embree/embree/archive/refs/tags/v3.13.1.tar.gz
+        sha256: 00dbd852f19ae2b95f5106dd055ca4b304486436ced0ccf842aec4e38a4df425
+    modules:
+      - name: extra-cmake-modules
+        buildsystem: cmake-ninja
+        sources:
+          - type: git
+            url: https://invent.kde.org/frameworks/extra-cmake-modules.git
+            tag: v5.100.0
+        # Attempt to build from source, but ISPC need glic-32bit which make things complicated.
+        # OSPRay need ISPC 1.9.2.
+      - name: ISPC
+        buildsystem: simple
+        build-commands:
+          - cp bin/ispc /app/bin/
+        sources:
+          - type: archive
+            url: https://github.com/ispc/ispc/releases/download/v1.16.0/ispc-v1.16.0-linux.tar.gz
+            sha256: 71a20e75ee1b952d8096a842368244111a0a727454d4a42043de10eadf02e740
+      - name: glfw
+        buildsystem: cmake-ninja
+        config-opts:
+          - -DGLFW_USE_WAYLAND:BOOL=ON
+          - -DBUILD_SHARED_LIBS:BOOL=ON
+          - -DGLFW_BUILD_EXAMPLES:BOOL=OFF
+          - -DGLFW_BUILD_TESTS:BOOL=OFF
+          - -DGLFW_BUILD_DOCS:BOOL=OFF
+        sources:
+          - type: archive
+            url: https://github.com/glfw/glfw/releases/download/3.3.4/glfw-3.3.4.zip
+            sha256: bbd2c42c660b725e9755eb417e40b373f0d4c03138c9b2e210d02cd308bd99cd
+
+  - name: OSPRay
+    buildsystem: cmake
+    builddir: true
+    config-opts:
+      - -DOSPRAY_ENABLE_APPS_BENCHMARK:BOOL=OFF
+      - -DOSPRAY_ENABLE_APPS_EXAMPLES:BOOL=OFF
+      - -DOSPRAY_ENABLE_APPS_TUTORIALS:BOOL=OFF
+      - -DOSPRAY_ENABLE_APPS_TESTING:BOOL=OFF
+    sources:
+      - type: archive
+        url: https://github.com/ospray/ospray/archive/refs/tags/v2.9.0.tar.gz
+        sha256: 0145e09c3618fb8152a32d5f5cff819eb065d90975ee4e35400d2db9eb9f6398
+    modules:
+      - name: rkcommon
+        buildsystem: cmake
+        builddir: true
+        config-opts:
+          - -DBUILD_TESTING:BOOL=OFF
+        sources:
+          - type: archive
+            url: https://github.com/ospray/rkcommon/archive/refs/tags/v1.9.0.tar.gz
+            sha256: b68aa02ef44c9e35c168f826a14802bb5cc6a9d769ba4b64b2c54f347a14aa53
+      - name: openvkl
+        buildsystem: cmake
+        builddir: true
+        config-opts:
+          - -DBUILD_EXAMPLES:BOOL=OFF
+          - -DBUILD_BENCHMARKS:BOOL=OFF
+          - -DBUILD_TESTING:BOOL=OFF
+        sources:
+          - type: archive
+            url: https://github.com/openvkl/openvkl/archive/refs/tags/v1.2.0.tar.gz
+            sha256: dc468c2f0a359aaa946e04a01c2a6634081f7b6ce31b3c212c74bf7b4b0c9ec2
+
+  - name: GDAL
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DACCEPT_MISSING_SQLITE3_RTREE:BOOL=ON
+      - -DBUILD_TESTING:BOOL=OFF
+    sources:
+      - type: archive
+        url: https://github.com/OSGeo/gdal/archive/refs/tags/v3.10.2.tar.gz
+        sha256: e4033fdf63d54ae8d754b694d877f965e1381d5d677286431833f1d580ad6d75
+        x-checker-data:
+          type: anitya
+          project-id: 881
+          stable-only: true
+          url-template: https://github.com/OSGeo/gdal/archive/refs/tags/v$version.tar.gz
+    modules:
+      - name: PROJ
+        buildsystem: cmake-ninja
+        config-opts:
+          - -DBUILD_TESTING:BOOL=OFF
+        sources:
+          - type: archive
+            url: https://github.com/OSGeo/PROJ/releases/download/9.5.1/proj-9.5.1.tar.gz
+            sha256: a8395f9696338ffd46b0feb603edbb730fad6746fba77753c77f7f997345e3d3
+            x-checker-data:
+              type: anitya
+              project-id: 9463
+              stable-only: true
+              url-template: https://github.com/OSGeo/PROJ/releases/download/$version/proj-$version.tar.gz
+
+  - name: GeoTIFF
+    builddir: true
+    sources:
+      - type: archive
+        url: https://download.osgeo.org/geotiff/libgeotiff/libgeotiff-1.7.4.tar.gz
+        sha256: c598d04fdf2ba25c4352844dafa81dde3f7fd968daa7ad131228cd91e9d3dc47
+        x-checker-data:
+          type: anitya
+          project-id: 21361
+          stable-only: true
+          url-template: https://download.osgeo.org/geotiff/libgeotiff/libgeotiff-$version.tar.gz
+
+  - name: LASzip
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: archive
+        url: https://github.com/LASzip/LASzip/releases/download/3.4.4/laszip-src-3.4.4.tar.gz
+        sha256: 41f826848ff106f471b134224f58075ac8e36a62b6ba0ad75be8a8c191bdba4b
+        x-checker-data:
+          type: anitya
+          project-id: 241499
+          stable-only: true
+          url-template: https://github.com/LASzip/LASzip/releases/download/$version/laszip-src-$version.tar.gz
+
+  - name: lapack
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_SHARED_LIBS=ON
+      - -DBUILD_TESTING=OFF
+      - -DLAPACKE=ON
+      - -DCBLAS=ON
+    sources:
+      - type: archive
+        url: https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.12.1.tar.gz
+        sha256: 2ca6407a001a474d4d4d35f3a61550156050c48016d949f0da0529c0aa052422
+        x-checker-data:
+          type: anitya
+          project-id: 1534
+          stable-only: true
+          url-template: https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v$version.tar.gz
+
+  - name: Eigen3
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: archive
+        url: https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2
+        sha256: b4c198460eba6f28d34894e3a5710998818515104d6e74e5cc331ce31e46e626
+        x-checker-data:
+          type: anitya
+          project-id: 13751
+          stable-only: true
+          url-template: https://gitlab.com/libeigen/eigen/-/archive/${version}/eigen-${version}.tar.bz2
+    cleanup:
+      - '*'
+
+  - name: SWIG
+    sources:
+      - type: archive
+        url: https://sourceforge.net/projects/swig/files/swig/swig-4.1.1/swig-4.1.1.tar.gz
+        sha256: 2af08aced8fcd65cdb5cc62426768914bedc735b1c250325203716f78e39ac9b
+
+  - name: OpenTURNS
+    buildsystem: cmake-ninja
+    sources:
+      - type: archive
+        url: https://github.com/openturns/openturns/archive/refs/tags/v1.24.tar.gz
+        sha256: 6c5232b4daf0b93fbc49dee45299ade2c2c16d44476700e7689af6b50c999f57
+        x-checker-data:
+          type: anitya
+          project-id: 220847
+          stable-only: true
+          url-template: https://github.com/openturns/openturns/archive/refs/tags/v${version}.tar.gz
+    cleanup:
+      - /share
+
+    # Provide libnuma for MEMKIND
+  - name: numactl
+    sources:
+      - type: archive
+        url: https://github.com/numactl/numactl/releases/download/v2.0.19/numactl-2.0.19.tar.gz
+        sha256: f2672a0381cb59196e9c246bf8bcc43d5568bc457700a697f1a1df762b9af884
+        x-checker-data:
+          type: anitya
+          project-id: 2507
+          stable-only: true
+          url-template: https://github.com/numactl/numactl/releases/download/v${version}/numactl-${version}.tar.gz
+
+  - name: ADIOS2
+    buildsystem: cmake
+    builddir: true
+    config-opts:
+      - -DADIOS2_RUN_INSTALL_TEST:BOOL=OFF
+      - -DADIOS2_BUILD_EXAMPLES=OFF
+      - -DBUILD_SHARED_LIBS=ON
+      - -DADIOS2_USE_HDF5:STRING=OFF
+      - -DBUILD_TESTING:BOOL=OFF
+      - -DINSTALL_GTEST:BOOL=OFF
+    sources:
+      - type: archive
+        url: https://github.com/ornladios/ADIOS2/archive/refs/tags/v2.10.2.tar.gz
+        sha256: 14cf0bcd94772194bce0f2c0e74dba187965d1cffd12d45f801c32929158579e
+        x-checker-data:
+          type: anitya
+          project-id: 220828
+          stable-only: true
+          url-template: https://github.com/ornladios/ADIOS2/archive/refs/tags/v${version}.tar.gz
+
+  - name: Catalyst
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_CXX_STANDARD:STRING=14 #Fix error: ‘std::uint64_t’ has not been declared
+      - -DCATALYST_BUILD_TESTING:BOOL=OFF
+      - -DCATALYST_USE_MPI:BOOL=ON
+      - -DCATALYST_WRAP_PYTHON:BOOL=ON
+    sources:
+      - type: git
+        url: https://gitlab.kitware.com/paraview/catalyst
+        commit: 777fe7fb5e7e86bacb96908ab33f49eeb2d01cf9
+
+  - name: gmsh
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DENABLE_BUILD_LIB=ON
+      - -DENABLE_BUILD_SHARED=ON
+      - -DENABLE_BUILD_DYNAMIC=ON
+      - -DENABLE_METIS=OFF #dunno why cannot compile
+      - -DENABLE_BLAS_LAPACK=ON
+      - -DENABLE_MPI:BOOL=ON
+    sources:
+      - type: archive
+        url: https://gmsh.info/src/gmsh-4.13.1-source.tgz
+        sha256: 77972145f431726026d50596a6a44fb3c1c95c21255218d66955806b86edbe8d
+        x-checker-data:
+          type: anitya
+          project-id: 9575
+          stable-only: true
+          url-template: https://gmsh.info/src/gmsh-$version-source.tgz
+
+  # - name: blosc
+  #   buildsystem: cmake-ninja
+  #   builddir: true
+  #   sources:
+  #     - type: git
+  #       url: https://github.com/Blosc/c-blosc.git
+  #       tag: v1.21.4
+  #       x-checker-data:
+  #         type: git
+  #         tag-pattern: ^(v[\d.]+)$
+  #
+  # - name: openvdb
+  #   buildsystem: cmake-ninja
+  #   builddir: true
+  #   config-opts:
+  #     - -DOPENVDB_CORE_STATIC:BOOL=OFF
+  #   sources:
+  #     - type: git
+  #       url: https://github.com/AcademySoftwareFoundation/openvdb.git
+  #       tag: v10.0.1
+  #       x-checker-data:
+  #         type: git
+  #         tag-pattern: ^(v[\d.]+)$
+
+  - name: PDAL
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DWITH_TESTS=OFF
+      - -DWITH_TESTS:BOOL=OFF
+      - -DWITH_LZMA:BOOL=OFF
+      - -DWITH_ZLIB:BOOL=ON
+      - -DWITH_ZSTD:BOOL=ON
+      - -DBUILD_PLUGIN_HDF:BOOL=OFF
+      - -DBUILD_PLUGIN_E57:BOOL=OFF
+    sources:
+      - type: archive
+        url: https://github.com/PDAL/PDAL/releases/download/2.8.3/PDAL-2.8.3-src.tar.bz2
+        sha256: 13dfdb0d634bdd568b351fd535aaa03f7611df4c2cdb8be938117751355ad09b
+        # New update need c++14 https://gitlab.kitware.com/vtk/vtk/-/issues/19189
+        # Until paraview use c++11 we stay on this version
+        # x-checker-data:
+        #   type: anitya
+        #   project-id: 138228
+        #   stable-only: true
+        #   url-template: https://github.com/PDAL/PDAL/releases/download/$version/PDAL-$version-src.tar.bz2
+
+  - name: Imath
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_TESTING:BOOL=OFF
+    sources:
+      - type: git
+        url: https://github.com/AcademySoftwareFoundation/Imath.git
+        tag: v3.1.12
+        commit: c0396a055a01bc537d32f435aee11a9b7ed6f0b5
+        x-checker-data:
+          type: git
+          tag-pattern: ^(v[\d.]+)$
+
+  - name: Alembic
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DUSE_TESTS:BOOL=OFF
+      - -DUSE_HDF5:BOOL=ON
+    sources:
+      - type: archive
+        url: https://github.com/alembic/alembic/archive/refs/tags/1.8.8.tar.gz
+        sha256: ba1f34544608ef7d3f68cafea946ec9cc84792ddf9cda3e8d5590821df71f6c6
+        x-checker-data:
+          type: anitya
+          project-id: 13980
+          stable-only: true
+          url-template: https://github.com/alembic/alembic/archive/refs/tags/$version.tar.gz
+
+  - name: OCCT
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: git
+        url: https://github.com/Open-Cascade-SAS/OCCT
+        tag: V7_8_1
+        commit: bd2a789f15235755ce4d1a3b07379a2e062fdc2e
+      - type: patch
+        path: freetype_use_unsigned_point_and_contour.patch
+
+  - name: Paraview
+    buildsystem: cmake-ninja
+    builddir: true
+    build-options:
+      cflags: -I/app/include/eigen3
+      cxxflags: -I/app/include/eigen3
+    config-opts:
+      - -DCMAKE_BUILD_TYPE:STRING=Release
+      - -DPARAVIEW_BUILD_DEVELOPER_DOCUMENTATION:BOOL=OFF
+      - -DPARAVIEW_BUILD_LEGACY_REMOVE:BOOL=OFF
+      - -DPARAVIEW_BUILD_LEGACY_SILENT:BOOL=OFF
+      - -DPARAVIEW_BUILD_SHARED_LIBS:BOOL=ON
+      - -DPARAVIEW_BUILD_TESTING:STRING=OFF
+      - -DPARAVIEW_BUILD_WITH_EXTERNAL:BOOL=OFF
+      - -DPARAVIEW_BUILD_WITH_KITS:BOOL=OFF
+      - -DPARAVIEW_ENABLE_ADIOS2:BOOL=ON
+      - -DPARAVIEW_ENABLE_ALEMBIC:BOOL=ON
+      - -DPARAVIEW_ENABLE_CATALYST:BOOL=ON
+      - -DPARAVIEW_ENABLE_EXAMPLES:BOOL=ON
+      - -DPARAVIEW_ENABLE_FFMPEG:BOOL=ON
+      - -DPARAVIEW_ENABLE_FIDES:BOOL=ON
+      - -DPARAVIEW_ENABLE_GDAL:BOOL=ON
+      - -DPARAVIEW_ENABLE_GEOVIS:BOOL=ON
+      - -DPARAVIEW_ENABLE_LAS:BOOL=OFF
+      - -DPARAVIEW_ENABLE_LOOKINGGLASS:BOOL=OFF # Propiertary
+      - -DPARAVIEW_ENABLE_MOMENTINVARIANTS:BOOL=OFF #Failed to build
+      - -DPARAVIEW_ENABLE_MOTIONFX:BOOL=ON
+      - -DPARAVIEW_ENABLE_NVPIPE:BOOL=OFF
+      - -DPARAVIEW_ENABLE_OCCT:BOOL=ON
+      - -DPARAVIEW_ENABLE_OPENTURNS:BOOL=ON
+      - -DPARAVIEW_ENABLE_OPENVDB:BOOL=OFF #https://github.com/AcademySoftwareFoundation/openvdb/issues/1160
+      - -DPARAVIEW_ENABLE_PDAL:BOOL=ON
+      - -DPARAVIEW_ENABLE_RAYTRACING:BOOL=ON
+      - -DPARAVIEW_ENABLE_VISITBRIDGE:BOOL=ON
+      - -DPARAVIEW_ENABLE_XDMF2:BOOL=ON
+      - -DPARAVIEW_ENABLE_XDMF3:BOOL=ON
+      - -DPARAVIEW_GENERATE_SPDX:BOOL=OFF
+      - -DPARAVIEW_INSTALL_DEVELOPMENT_FILES:BOOL=ON
+      - -DPARAVIEW_PLUGINS_DEFAULT:BOOL=ON
+      - -DPARAVIEW_PLUGIN_DISABLE_XML_DOCUMENTATION:BOOL=OFF
+      - -DPARAVIEW_PLUGIN_ENABLE_AcceleratedAlgorithms:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_AnalyzeNIfTIReaderWriter:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_ArrowGlyph:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_BagPlotViewsAndFilters:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_CAVEInteraction:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_CDIReader:BOOL=OFF
+      - -DPARAVIEW_PLUGIN_ENABLE_Datamine:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_DigitalRockPhysics:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_EmbossingRepresentations:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_ExplicitStructuredGrid:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_FlipBookPlugin:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_GMVReader:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_GeodesicMeasurement:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_GeographicalMap:BOOL=ON #https://gitlab.kitware.com/paraview/paraview/-/issues/22622
+      - -DPARAVIEW_PLUGIN_ENABLE_GmshIO:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_GmshReader:BOOL=OFF #https://gitlab.kitware.com/paraview/paraview/-/issues/22651
+      - -DPARAVIEW_PLUGIN_ENABLE_HyperTreeGridADR:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_InSituExodus:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_LANLX3DReader:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_LagrangianParticleTracker:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_LegacyExodusReader:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_LookingGlass:BOOL=OFF # proprietary
+      - -DPARAVIEW_PLUGIN_ENABLE_Moments:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_MooseXfemClip:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_NodeEditor:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_NonOrthogonalSource:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_PanoramicProjectionView:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_ParFlow:BOOL=OFF
+      - -DPARAVIEW_PLUGIN_ENABLE_ParametricSurfaces:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_SLACTools:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_SaveStateAndScreenshot:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_SpaceMouseInteractor:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_StreamLinesRepresentation:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_StreamingParticles:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_SurfaceLIC:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_ThickenLayeredCells:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_VDFReaderPlugin:BOOL=OFF # Need vapor version 2. Hard to compile from source
+      - -DPARAVIEW_PLUGIN_ENABLE_VTKmFilters:BOOL=ON
+      - -DPARAVIEW_PLUGIN_ENABLE_XRInterface:BOOL=OFF #need openvr
+      - -DPARAVIEW_PLUGIN_ENABLE_pvNVIDIAIndeX:BOOL=OFF
+      - -DPARAVIEW_PLUGIN_ENABLE_zSpace:BOOL=OFF
+      - -DPARAVIEW_USE_CUDA:BOOL=OFF
+      - -DPARAVIEW_USE_HIP:BOOL=OFF
+      - -DPARAVIEW_USE_MEMKIND:BOOL=OFF #memkind has stop development
+      - -DPARAVIEW_USE_MPI:BOOL=ON
+      - -DPARAVIEW_USE_PYTHON:BOOL=ON
+      - -DPARAVIEW_USE_QT:BOOL=ON
+      - -DPARAVIEW_USE_QTHELP:BOOL=ON
+      - -DPARAVIEW_USE_QTWEBENGINE:BOOL=ON
+      - -DPARAVIEW_USE_VTKM:BOOL=ON
+      - -DBUILD_EXAMPLES:BOOL=ON
+      - -DPARAVIEW_INSTALL_DEVELOPMENT_FILES:BOOL=ON
+      - -DGmsh_INCLUDE_DIR=/app/include
+      - -DGmsh_PRIVATE_INCLUDE_DIR=/app/include/gmsh
+      - -DVTK_SMP_ENABLE_TBB:BOOL=ON
+      - -DVTK_MODULE_USE_EXTERNAL_VTK_eigen:BOOL=ON
+    post-install:
+      - install -Dm644 ../Qt/Components/Resources/Icons/pvIcon.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
+      - desktop-file-edit --set-icon=${FLATPAK_ID} ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+    sources:
+      - type: archive
+        url: https://www.paraview.org/files/v5.13/ParaView-v5.13.2.tar.gz
+        sha256: 9167c7c5d3656e36b160a22ed7a4c99b46fc96498caf5805484089856e93636f
+        x-checker-data:
+          type: anitya
+          project-id: 9602
+          stable-only: true
+          url-template: https://www.paraview.org/files/v$major.$minor/ParaView-v$version.tar.gz
+      - type: patch
+        path: fix_appdata_file.patch
+      - type: patch
+        path: fix_linkerflag_build_fail.patch #https://gitlab.kitware.com/paraview/paraview/-/issues/22797

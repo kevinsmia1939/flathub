@@ -1,0 +1,12 @@
+diff -ruN a/CMake/ParaViewCompilerExtraFlags.cmake b/CMake/ParaViewCompilerExtraFlags.cmake
+--- a/CMake/ParaViewCompilerExtraFlags.cmake	2024-09-27 03:54:08.000000000 +0200
++++ b/CMake/ParaViewCompilerExtraFlags.cmake	2025-02-22 22:45:47.659093168 +0100
+@@ -37,7 +37,7 @@
+       set_target_properties(paraviewbuild
+         PROPERTIES
+         INTERFACE_LINK_OPTIONS
+-        "LINKER:SHELL:${PARAVIEW_EXTRA_SHARED_LINKER_FLAGS} -lc ${CMAKE_SHARED_LINKER_FLAGS}")
++        "LINKER:SHELL:${PARAVIEW_EXTRA_SHARED_LINKER_FLAGS} -lc")
+     endif()
+   endif()
+ 

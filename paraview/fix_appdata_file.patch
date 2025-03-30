@@ -1,0 +1,23 @@
+diff -ruN a/Clients/ParaView/org.paraview.ParaView.appdata.xml b/Clients/ParaView/org.paraview.ParaView.appdata.xml
+--- a/Clients/ParaView/org.paraview.ParaView.appdata.xml	2024-05-17 21:14:27.000000000 +0200
++++ b/Clients/ParaView/org.paraview.ParaView.appdata.xml	2024-06-11 22:52:58.127264761 +0200
+@@ -55,4 +55,19 @@
+  <url type="faq">https://www.paraview.org/Wiki/ParaView:FAQ</url>
+  <url type="help">https://www.paraview.org/documentation/</url>
+  <update_contact>paraview+paraview-support@discourse.paraview.org</update_contact>
++ <content_rating type="oars-1.1"/>
++ <releases>
++     <release version="5.13.2" date="2024-12-30"/>
++     <release version="5.13.1" date="2024-09-28"/>
++     <release version="5.13.0" date="2024-08-22"/>
++     <release version="5.12.1" date="2024-05-17"/>
++     <release version="5.12.0" date="2024-02-28"/>
++     <release version="5.11.2" date="2023-09-25"/>
++     <release version="5.11.1" date="2023-03-31"/>
++     <release version="5.11.0" date="2022-11-17"/>
++     <release version="5.10.1" date="2022-03-15"/>
++     <release version="5.10.0" date="2021-12-22"/>
++     <release version="5.9.1" date="2021-05-18"/>
++ </releases>
++ <developer_name>Kitware Inc.</developer_name>
+ </component>
