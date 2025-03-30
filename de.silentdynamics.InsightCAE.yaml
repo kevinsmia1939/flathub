@@ -2,10 +2,9 @@ app-id: de.silentdynamics.InsightCAE
 runtime: org.kde.Sdk
 sdk: org.kde.Sdk
 runtime-version: 5.15-24.08
-# base: io.qt.qtwebengine.BaseApp
 base-version: 5.15-24.08
-rename-icon: paraview
-command: paraview
+rename-icon: insightcae
+command: insightcae
 finish-args:
   - --share=ipc
   - --socket=x11
