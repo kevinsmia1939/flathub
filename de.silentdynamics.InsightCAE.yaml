@@ -24,7 +24,7 @@ cleanup:
 
 modules:
     # ParaView manifest include Boost, VTK, OCCT
-  - paraview/org.paraview.ParaView.yaml
+  # - paraview/org.paraview.ParaView.yaml
 
   - name: Armadillo
     buildsystem: cmake-ninja
@@ -41,44 +41,44 @@ modules:
         url: https://ftp.gnu.org/gnu/gsl/gsl-2.6.tar.gz
         sha256: b782339fc7a38fe17689cb39966c4d821236c28018b6593ddb6fd59ee40786a8
 
-  # - name: Boost
-  #   buildsystem: simple
-  #   build-commands:
-  #     - ./bootstrap.sh --prefix=/app
-  #     - ./b2 install cxxstd=14 cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $FLATPAK_BUILDER_N_JOBS
-  #   sources:
-  #     - type: archive
-  #       url: https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz
-  #       sha256: f55c340aa49763b1925ccf02b2e83f35fdcf634c9d5164a2acb87540173c741d
+  - name: Boost
+    buildsystem: simple
+    build-commands:
+      - ./bootstrap.sh --prefix=/app
+      - ./b2 install cxxstd=14 cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $FLATPAK_BUILDER_N_JOBS
+    sources:
+      - type: archive
+        url: https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz
+        sha256: f55c340aa49763b1925ccf02b2e83f35fdcf634c9d5164a2acb87540173c741d
 
-  # - name: VTK
-  #   buildsystem: cmake-ninja
-  #   builddir: true
-  #   config-opts:
-  #     - -DBUILD_SHARED_LIBS=ON
-  #     - -DBUILD_TESTING:BOOL=OFF
-  #     - -DVTK_GROUP_ENABLE_Qt:BOOL=YES
-  #     - -DVTK_BUILD_COMPILE_TOOLS_ONLY:BOOL=OFF
-  #     - -DVTK_DEFAULT_RENDER_WINDOW_OFFSCREEN:BOOL=ON
-  #   sources:
-  #     - type: archive
-  #       url: https://www.vtk.org/files/release/9.4/VTK-9.4.1.tar.gz
-  #       sha256: c253b0c8d002aaf98871c6d0cb76afc4936c301b72358a08d5f3f72ef8bc4529
-  #
-  # - name: opencascade
-  #   buildsystem: cmake-ninja
-  #   builddir: true
-  #   config-opts:
-  #     - -DUSE_VTK=ON
-  #     - -DBUILD_DOC_Overview=OFF
-  #     - -D3RDPARTY_VTK_INCLUDE_DIR=/app/include/vtk-9.4/
-  #   sources:
-  #     - type: git
-  #       url: https://github.com/Open-Cascade-SAS/OCCT
-  #       tag: V7_4_0p2
-  #       commit: 85f78ac11072de6694d3a60343640bb7eef90526
-  #     - type: patch
-  #       path: freetype_use_unsigned_point_and_contour.patch
+  - name: VTK
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DBUILD_SHARED_LIBS=ON
+      - -DBUILD_TESTING:BOOL=OFF
+      - -DVTK_GROUP_ENABLE_Qt:BOOL=YES
+      - -DVTK_BUILD_COMPILE_TOOLS_ONLY:BOOL=OFF
+      - -DVTK_DEFAULT_RENDER_WINDOW_OFFSCREEN:BOOL=ON
+    sources:
+      - type: archive
+        url: https://www.vtk.org/files/release/9.4/VTK-9.4.1.tar.gz
+        sha256: c253b0c8d002aaf98871c6d0cb76afc4936c301b72358a08d5f3f72ef8bc4529
+
+  - name: opencascade
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DUSE_VTK=ON
+      - -DBUILD_DOC_Overview=OFF
+      - -D3RDPARTY_VTK_INCLUDE_DIR=/app/include/vtk-9.4/
+    sources:
+      - type: git
+        url: https://github.com/Open-Cascade-SAS/OCCT
+        tag: V7_4_0p2
+        commit: 85f78ac11072de6694d3a60343640bb7eef90526
+      - type: patch
+        path: freetype_use_unsigned_point_and_contour.patch
 
   - name: dxflib
     buildsystem: simple
