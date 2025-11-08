@@ -28,8 +28,11 @@ modules:
           tag-pattern: ^(v[\d.]+)$
 
   - name: iRASPA-QT
-    buildsystem: cmake
+    buildsystem: cmake-ninja
+    builddir: _build
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_TESTING=OFF
     sources:
-      - type: git
-        url: https://github.com/iRASPA/iRASPA-QT
-        tag: v2.3.2
+      - type: dir
+        path: iRASPA-QT
