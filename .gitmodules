@@ -1,0 +1,3 @@
+[submodule "iRASPA-QT"]
+	path = iRASPA-QT
+	url = https://github.com/iRASPA/iRASPA-QT.git
