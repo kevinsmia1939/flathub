@@ -1,0 +1,63 @@
+--- a/iraspa/CMakeLists.txt	2026-04-18 15:27:41.179331092 +0200
++++ b/iraspa/CMakeLists.txt	2026-04-18 15:57:11.669837759 +0200
+@@ -33,10 +33,10 @@
+ find_package(Qt6OpenGL REQUIRED)
+ find_package(Qt6Concurrent REQUIRED)
+ find_package(Qt6OpenGLWidgets REQUIRED)
+-find_package(PythonLibs REQUIRED)
++find_package(Python3 COMPONENTS Development REQUIRED)
+ find_package(OpenCL REQUIRED)
+ 
+-include_directories(${PYTHON_INCLUDE_DIRS})
++include_directories(${Python3_INCLUDE_DIRS})
+ 
+ INCLUDE_DIRECTORIES(/usr/local/include)
+ LINK_DIRECTORIES(/usr/local/lib)
+@@ -49,7 +49,11 @@
+ include_directories(foundationkit)
+ include_directories(symmetrykit)
+ include_directories(simulationkit)
++include_directories(simulationkit/opencl)
+ include_directories(renderkit)
++include_directories(renderkit/opengl)
++include_directories(renderkit/opengl/geometry)
++add_definitions(-DUSE_OPENGL)
+ 
+ file(GLOB_RECURSE SOURCES
+     "${CMAKE_SOURCE_DIR}/iraspagui/*.ui"
+@@ -68,10 +72,18 @@
+     "${CMAKE_SOURCE_DIR}/symmetrykit/*.cpp"
+     "${CMAKE_SOURCE_DIR}/simulationkit/*.h"
+     "${CMAKE_SOURCE_DIR}/simulationkit/*.cpp"
++    "${CMAKE_SOURCE_DIR}/simulationkit/opencl/*.h"
++    "${CMAKE_SOURCE_DIR}/simulationkit/opencl/*.cpp"
+     "${CMAKE_SOURCE_DIR}/renderkit/*.h"
+     "${CMAKE_SOURCE_DIR}/renderkit/*.cpp"
++    "${CMAKE_SOURCE_DIR}/renderkit/opengl/*.h"
++    "${CMAKE_SOURCE_DIR}/renderkit/opengl/*.cpp"
++    "${CMAKE_SOURCE_DIR}/renderkit/opengl/geometry/*.h"
++    "${CMAKE_SOURCE_DIR}/renderkit/opengl/geometry/*.cpp"
+ )
+ 
++list(FILTER SOURCES EXCLUDE REGEX "(directx12|vulkan)(\\\\|/)")
++
+ #=================== SETUP EXECTUABLE ====================#
+ # Enable debug logging on RELWITHDEBINFO configuration
+ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS
+@@ -98,12 +110,13 @@
+ target_link_libraries(iRASPA Qt6::Concurrent)
+ target_link_libraries(iRASPA Qt6::OpenGLWidgets)
+ target_link_libraries(iRASPA ${OpenCL_LIBRARIES})
+-target_link_libraries(iRASPA ${PYTHON_LIBRARIES})
+-target_link_libraries(iRASPA -lx264)
++target_link_libraries(iRASPA ${Python3_LIBRARIES})
+ target_link_libraries(iRASPA -lswscale)
+ target_link_libraries(iRASPA -lavutil)
+ target_link_libraries(iRASPA -lavformat)
+ target_link_libraries(iRASPA -lavcodec)
+ target_link_libraries(iRASPA -llzma)
+ target_link_libraries(iRASPA -lz)
+-target_link_libraries(iRASPA "-framework Accelerate")
++
++
++install(TARGETS iRASPA DESTINATION bin)

@@ -1,0 +1,47 @@
+--- a/iraspa/iraspagui/atomtreeview.cpp	2026-04-18 15:31:05.356604461 +0200
++++ b/iraspa/iraspagui/atomtreeview.cpp	2026-04-18 15:31:05.358605906 +0200
+@@ -1158,7 +1158,7 @@
+         }
+         else
+         {
+-          QFile qFile = fileURLs.first().toLocalFile();
++          QFile qFile(fileURLs.first().toLocalFile());
+           if (qFile.open(QIODevice::WriteOnly))
+           {
+             QTextStream out(&qFile);
+@@ -1202,7 +1202,7 @@
+         }
+         else
+         {
+-          QFile qFile = fileURLs.first().toLocalFile();
++          QFile qFile(fileURLs.first().toLocalFile());
+           if (qFile.open(QIODevice::WriteOnly))
+           {
+             QTextStream out(&qFile);
+@@ -1243,7 +1243,7 @@
+         }
+         else
+         {
+-          QFile qFile = fileURLs.first().toLocalFile();
++          QFile qFile(fileURLs.first().toLocalFile());
+           if (qFile.open(QIODevice::WriteOnly))
+           {
+             QTextStream out(&qFile);
+@@ -1286,7 +1286,7 @@
+         }
+         else
+         {
+-          QFile qFile = fileURLs.first().toLocalFile();
++          QFile qFile(fileURLs.first().toLocalFile());
+           if (qFile.open(QIODevice::WriteOnly))
+           {
+             QTextStream out(&qFile);
+@@ -1328,7 +1328,7 @@
+        }
+        else
+        {
+-         QFile qFile = fileURLs.first().toLocalFile();
++         QFile qFile(fileURLs.first().toLocalFile());
+          if (qFile.open(QIODevice::WriteOnly))
+          {
+            QTextStream out(&qFile);
