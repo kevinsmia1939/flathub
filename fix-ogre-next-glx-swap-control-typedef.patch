@@ -1,0 +1,13 @@
+--- a/RenderSystems/GL3Plus/src/windowing/GLX/OgreGLXWindow.cpp
++++ b/RenderSystems/GL3Plus/src/windowing/GLX/OgreGLXWindow.cpp
+@@ -718,7 +718,8 @@ namespace Ogre
+         PFNGLXSWAPINTERVALEXTPROC _glXSwapIntervalEXT;
+         _glXSwapIntervalEXT =
+                 (PFNGLXSWAPINTERVALEXTPROC)mGLSupport->getProcAddress("glXSwapIntervalEXT");
+-        PFNGLXSWAPINTERVALMESAPROC _glXSwapIntervalMESA;
++        typedef int (*GLXSwapIntervalMESAProc)(unsigned int interval);
++        GLXSwapIntervalMESAProc _glXSwapIntervalMESA;
+         _glXSwapIntervalMESA =
+-                (PFNGLXSWAPINTERVALMESAPROC)mGLSupport->getProcAddress("glXSwapIntervalMESA");
++                (GLXSwapIntervalMESAProc)mGLSupport->getProcAddress("glXSwapIntervalMESA");
+         PFNGLXSWAPINTERVALSGIPROC _glXSwapIntervalSGI;

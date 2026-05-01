@@ -26,9 +26,9 @@
         </ul>
             
     </description>
-    <url type="homepage">http://gazebosim.org/</url>
+    <url type="homepage">https://gazebosim.org/</url>
     <url type="help">https://community.gazebosim.org/</url>
-    <url type="bugtracker">https://github.com/osrf/gazebo/issues</url>
+    <url type="bugtracker">https://github.com/gazebosim/gz-sim/issues</url>
     <screenshots>
         <screenshot type="default">
             <image>https://www.openchemistry.org/wp-content/uploads/2014/05/avogadro2-first-renders-i2x4-gro.png</image>
@@ -57,7 +57,7 @@
     </screenshots>
     <content_rating type="oars-1.1"/>
     <releases>
-        <release version="11.7.0" date="2021-04-20">
+        <release version="10.2.0">
     </release>
   </releases>
 </component> 
