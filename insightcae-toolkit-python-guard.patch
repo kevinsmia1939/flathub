@@ -1,0 +1,20 @@
+--- a/src/toolkit/CMakeLists.txt
++++ b/src/toolkit/CMakeLists.txt
+@@ -364,7 +364,7 @@
+     Boost::iostreams
+     Boost::program_options
+ )
+-if (PYTHONLIBS_FOUND)
++if (PYTHONLIBS_FOUND AND INSIGHT_BUILD_PYTHONBINDINGS)
+     target_link_libraries(toolkit PUBLIC
+         Boost::python3)
+ endif()
+@@ -381,7 +381,7 @@
+ target_link_libraries(toolkit PUBLIC GSL::gsl GSL::gslcblas)
+ target_link_libraries(toolkit PUBLIC OpenSSL::SSL)
+ target_link_libraries(toolkit PUBLIC vtkHeaders)
+-if (PYTHONLIBS_FOUND)
++if (PYTHONLIBS_FOUND AND INSIGHT_BUILD_PYTHONBINDINGS)
+   target_link_libraries(toolkit PUBLIC ${PYTHON_LIBRARIES})
+ endif()
+ if (WIN32)

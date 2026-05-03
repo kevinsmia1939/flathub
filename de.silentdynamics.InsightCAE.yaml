@@ -22,8 +22,32 @@ cleanup:
   - '*.a'
 
 modules:
-    # ParaView manifest include Boost, VTK, OCCT
-  # - paraview/org.paraview.ParaView.yaml
+  - name: OpenBLAS
+    no-autogen: true
+    make-args:
+      - DYNAMIC_ARCH=1
+      - DYNAMIC_OLDER=1
+      - FC=gfortran
+      - TARGET=GENERIC
+      - USE_OPENMP=0
+    make-install-args:
+      - PREFIX=/app
+    cleanup:
+      - /bin
+      - /include
+      - /lib/cmake
+      - /lib/*.a
+      - /lib/*.la
+      - /lib/pkgconfig
+      - /share/man
+    sources:
+      - type: archive
+        url: https://github.com/OpenMathLib/OpenBLAS/archive/v0.3.31.tar.gz
+        sha512: 703b84c476c148a0922a04b1c33c9c4c452f478d608d93e59204b8f0f2c516344301ff0a4dbb3750a2449db0d28cc2df001c295898e859b41ecb8381f9c2eab8
+        x-checker-data:
+          type: anitya
+          project-id: 2540
+          url-template: https://github.com/OpenMathLib/OpenBLAS/archive/v$version.tar.gz
 
   - name: Armadillo
     buildsystem: cmake-ninja
@@ -40,15 +64,27 @@ modules:
         url: https://ftp.gnu.org/gnu/gsl/gsl-2.6.tar.gz
         sha256: b782339fc7a38fe17689cb39966c4d821236c28018b6593ddb6fd59ee40786a8
 
+  - name: openmpi
+    cleanup:
+      - /bin
+    sources:
+      - type: archive
+        url: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.bz2
+        sha256: 92912e175fd1234368c8730c03f4996fe5942e7479bb1d10059405e7f2b3930d
+
   - name: Boost
     buildsystem: simple
     build-commands:
       - ./bootstrap.sh --prefix=/app
-      - ./b2 install cxxstd=14 cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $FLATPAK_BUILDER_N_JOBS
+      - ./b2 install cxxflags="-std=c++14 $CXXFLAGS" linkflags="$LDFLAGS" -j $FLATPAK_BUILDER_N_JOBS
     sources:
       - type: archive
-        url: https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz
-        sha256: f55c340aa49763b1925ccf02b2e83f35fdcf634c9d5164a2acb87540173c741d
+        url: https://archives.boost.io/release/1.65.1/source/boost_1_65_1.tar.gz
+        sha256: a13de2c8fbad635e6ba9c8f8714a0e6b4264b60a29b964b940a22554705b6b60
+      - type: patch
+        path: boost-build-gcc-implicit-decl.patch
+      - type: patch
+        path: boost-python312.patch
 
   - name: VTK
     buildsystem: cmake-ninja
@@ -64,18 +100,28 @@ modules:
         url: https://www.vtk.org/files/release/9.4/VTK-9.4.1.tar.gz
         sha256: c253b0c8d002aaf98871c6d0cb76afc4936c301b72358a08d5f3f72ef8bc4529
 
+  - name: libXmu
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://www.x.org/releases/individual/lib/libXmu-1.2.1.tar.gz
+        sha256: bf0902583dd1123856c11e0a5085bd3c6e9886fbbd44954464975fd7d52eb599
+
   - name: opencascade
     buildsystem: cmake-ninja
     builddir: true
     config-opts:
       - -DUSE_VTK=ON
       - -DBUILD_DOC_Overview=OFF
-      - -D3RDPARTY_VTK_INCLUDE_DIR=/app/include/vtk-9.4/
+      - -DBUILD_MODULE_Draw=OFF
+      - -DVTK_DIR=/app/lib/cmake/vtk-9.4
+      - -D3RDPARTY_VTK_INCLUDE_DIR=/app/include/vtk-9.4
+      - -D3RDPARTY_VTK_LIBRARY_DIR=/app/lib
     sources:
       - type: git
         url: https://github.com/Open-Cascade-SAS/OCCT
-        tag: V7_4_0p2
-        commit: 85f78ac11072de6694d3a60343640bb7eef90526
+        tag: V7_7_0
+        commit: 185d29b92f6764ffa9fc195b7dbe7bba3c4ac855
       - type: patch
         path: freetype_use_unsigned_point_and_contour.patch
 
@@ -101,6 +147,7 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - -DENABLE_QT6=OFF
+      - -DENABLE_BOOST=OFF
     sources:
       - type: archive
         url: https://poppler.freedesktop.org/poppler-25.02.0.tar.xz
@@ -123,64 +170,21 @@ modules:
           commands:
             - autoreconf -ifv
 
-  - name: VTK-DICOM
-    buildsystem: cmake-ninja
-    builddir: true
-    config-opts:
-      - -DBUILD_SHARED_LIBS=ON
-      - -DBUILD_PYTHON_WRAPPERS=OFF
-      - -DCMAKE_BUILD_TYPE=Release
-      - -DVTK_VERSIONED_INSTALL=OFF
-      - -DDICOM_CUSTOM_LIBRARY_SUFFIX=pvis
-    sources:
-      - type: git
-        url: https://github.com/dgobbi/vtk-dicom
-        commit: 33d3f1cd2223a60a58ca0ca42face5315d69f7ca
-
-  - name: openmpi
-    cleanup:
-      - /bin
-    sources:
-      - type: archive
-        url: https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.bz2
-        sha256: 92912e175fd1234368c8730c03f4996fe5942e7479bb1d10059405e7f2b3930d
-
-  # - name: OpenFOAM-v2412
-  #   buildsystem: simple
-  #   build-options:
-  #       env:
-  #       WM_PROJECT_DIR: /run/build/OpenFOAM
-  #       WM_MPLIB: SYSTEMOPENMPI
-  #   build-commands:
-  #       - export WM_PROJECT_DIR=/run/build/OpenFOAM && source etc/bashrc && ./Allwmake -j
-  #       - install -d /app/lib/openfoam
-  #       - mv bin /app/lib/openfoam/openfoam2412/
-  #       - mv etc /app/lib/openfoam/openfoam2412/
-  #       - mv platforms /app/lib/openfoam/openfoam2412/
-  #       - mv META-INFO /app/lib/openfoam/openfoam2412/
-  #       - mv applications /app/lib/openfoam/openfoam2412/
-  #       - mv src /app/lib/openfoam/openfoam2412/
-  #       - mv wmake /app/lib/openfoam/openfoam2412/
-  #       - mv doc /app/lib/openfoam/openfoam2412/
-  #       # Setup OpenFOAM environment
-  #       - install -d /app/etc/profile.d
-  #       - echo "export FOAM_INST_DIR=/app/lib/openfoam/openfoam2412" > /app/etc/profile.d/openfoam.sh
-  #       - echo "export PATH=/app/lib/openfoam/openfoam2412/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
-  #       - echo "export WM_MPLIB=SYSTEMOPENMPI" >> /app/etc/profile.d/openfoam.sh
-  #       - echo "export MPI_ROOT=/usr/lib/openmpi" >> /app/etc/profile.d/openfoam.sh
-  #       - echo "export PATH=/usr/lib/openmpi/bin:\$PATH" >> /app/etc/profile.d/openfoam.sh
-  #       - echo "export LD_LIBRARY_PATH=/usr/lib/openmpi/lib:\$LD_LIBRARY_PATH" >> /app/etc/profile.d/openfoam.sh
-  #       - echo "alias ofoam='source /app/lib/openfoam/openfoam2412/etc/bashrc'" >> /app/etc/profile.d/openfoam.sh
-  #       - chmod 755 /app/etc/profile.d/openfoam.sh
-  #       # Create OpenFOAM wrapper script
-  #       - echo "#!/bin/sh" > /app/bin/openfoam
-  #       - echo "source /app/etc/profile.d/openfoam.sh" >> /app/bin/openfoam
-  #       - echo "exec \"\$@\"" >> /app/bin/openfoam
-  #       - chmod +x /app/bin/openfoam
+  # - name: VTK-DICOM
+  #   buildsystem: cmake-ninja
+  #   builddir: true
+  #   config-opts:
+  #     - -DBUILD_SHARED_LIBS=ON
+  #     - -DBUILD_PYTHON_WRAPPERS=OFF
+  #     - -DCMAKE_BUILD_TYPE=Release
+  #     - -DVTK_VERSIONED_INSTALL=OFF
+  #     - -DDICOM_CUSTOM_LIBRARY_SUFFIX=pvis
   #   sources:
-  #     - type: archive
-  #       url: https://dl.openfoam.com/source/v2412/OpenFOAM-v2412.tgz
-  #       sha256: c353930105c39b75dac7fa7cfbfc346390caa633a868130fd8c9816ef5f732cd
+  #     - type: git
+  #       url: https://github.com/dgobbi/vtk-dicom
+  #       commit: 33d3f1cd2223a60a58ca0ca42face5315d69f7ca
+
+
 
   - name: InsightCAE
     buildsystem: cmake-ninja
@@ -191,10 +195,17 @@ modules:
     sources:
       - type: git
         url: https://github.com/hkroeger/insightcae
-        commit: 7d41a5555d0f8ed3e3b4233f2d1e11cac2c73f78
+        commit: ba427fb72b73e3511b3c238ecc84e43ca1b6c74a
         branch: next-release
+      - type: patch
+        path: insightcae-boost-scoped-enums.patch
+      - type: patch
+        path: insightcae-vtk-dicom-serialise.patch
+      - type: patch
+        path: insightcae-boost-io-context.patch
+      - type: patch
+        path: insightcae-vtk-dicom-include-dir.patch
       - type: git
         url: https://github.com/dgobbi/vtk-dicom
         commit: 33d3f1cd2223a60a58ca0ca42face5315d69f7ca
         dest: vtk-dicom
-

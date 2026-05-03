@@ -1,0 +1,561 @@
+diff --git a/src/pdl/CMakeLists.txt b/src/pdl/CMakeLists.txt
+index 3d51f52..297a5b0 100644
+--- a/src/pdl/CMakeLists.txt
++++ b/src/pdl/CMakeLists.txt
+@@ -43,8 +43,6 @@ target_link_libraries(pdl
+ target_compile_definitions(pdl
+     PRIVATE
+         BOOST_SPIRIT_USE_PHOENIX_V3
+-        BOOST_NO_SCOPED_ENUMS
+-        BOOST_NO_CXX11_SCOPED_ENUMS
+     )
+ install(TARGETS pdl RUNTIME DESTINATION bin)
+ 
+diff --git a/CMake/FindOCC.cmake b/CMake/FindOCC.cmake
+--- a/CMake/FindOCC.cmake
++++ b/CMake/FindOCC.cmake
+@@ -65,4 +65,10 @@ if (OCE_FOUND OR OCC_FOUND)
+ 
+  message(STATUS "Found OCC/OCE ${OCC_VERSION_MAJOR}.${OCC_VERSION_MINOR}.${OCC_VERSION_MAINTENANCE}")
+ 
++ add_definitions(
++   -DOCC_VERSION_MAJOR=${OCC_VERSION_MAJOR}
++   -DOCC_VERSION_MINOR=${OCC_VERSION_MINOR}
++   -DOCC_VERSION_MAINTENANCE=${OCC_VERSION_MAINTENANCE}
++ )
++
+ endif()
+diff --git a/src/pdl/parametergenerator.h b/src/pdl/parametergenerator.h
+index 77f7f54..6e6222e 100644
+--- a/src/pdl/parametergenerator.h
++++ b/src/pdl/parametergenerator.h
+@@ -6,6 +6,7 @@
+ 
+ 
+ #include <boost/filesystem.hpp>
++#include <boost/lexical_cast.hpp>
+ #include <boost/tokenizer.hpp>
+ #include <boost/algorithm/string.hpp>
+ #include <boost/algorithm/string/regex.hpp>
+diff --git a/src/cad/featureset.h b/src/cad/featureset.h
+index 132e157..bb19792 100644
+--- a/src/cad/featureset.h
++++ b/src/cad/featureset.h
+@@ -37,19 +37,6 @@
+ #include "base/linearalgebra.h"
+ #include "occinclude.h"
+ 
+-#ifndef WIN32
+-namespace boost
+-{
+-  
+-template <>
+-struct is_arithmetic<arma::mat> 
+-: public true_type
+-{
+-};
+-
+-}
+-#endif
+-
+ namespace insight 
+ {
+ namespace cad 
+diff --git a/src/toolkit/base/boost_include.h b/src/toolkit/base/boost_include.h
+index 0695a6f..31f73a7 100644
+--- a/src/toolkit/base/boost_include.h
++++ b/src/toolkit/base/boost_include.h
+@@ -41,14 +41,17 @@ namespace boost
+ namespace filesystem
+ {
+ 
+-template < >
+-path& path::append< typename path::iterator >(
+-    typename path::iterator begin,
+-    typename path::iterator end,
+-    const codecvt_type& cvt );
+-
+-
+-
++#if BOOST_VERSION >= 108700
++namespace copy_option
++{
++static constexpr copy_options fail_if_exists = copy_options::none;
++static constexpr copy_options overwrite_if_exists = copy_options::overwrite_existing;
++}
++
++std::string basename(const path& p);
++path change_extension(path p, const path& new_extension);
++#endif
++
+ boost::filesystem::path
+ make_relative(
+     boost::filesystem::path a_From,
+diff --git a/src/toolkit/base/boost_include.cpp b/src/toolkit/base/boost_include.cpp
+index a25f7c9..eff0db6 100644
+--- a/src/toolkit/base/boost_include.cpp
++++ b/src/toolkit/base/boost_include.cpp
+@@ -12,24 +12,19 @@ namespace boost
+ namespace filesystem
+ {
+ 
+-
+-
+-
+-template < >
+-// path& path::append< typename path::iterator >( typename path::iterator begin, typename path::iterator end, const codecvt_type& cvt)
+-path&
+-path::append< typename path::iterator >(
+-    typename path::iterator begin,
+-    typename path::iterator end )
+-{
+-    for( ; begin != end ; ++begin )
+-        *this /= *begin;
+-    return *this;
+-}
+-
+-
+-
+-
++#if BOOST_VERSION >= 108700
++std::string basename(const path& p)
++{
++    return p.stem().string();
++}
++
++path change_extension(path p, const path& new_extension)
++{
++    p.replace_extension(new_extension);
++    return p;
++}
++#endif
++
+ // Return path when appended to a_From will resolve to same as a_To
+ path
+ make_relative(
+diff --git a/src/toolkit/openfoam/blockmesh/point.h b/src/toolkit/openfoam/blockmesh/point.h
+index 1e703c1..02e0ba4 100644
+--- a/src/toolkit/openfoam/blockmesh/point.h
++++ b/src/toolkit/openfoam/blockmesh/point.h
+@@ -16,9 +16,30 @@ namespace bmd {
+ typedef arma::mat Point;
+ 
+ 
++struct PointLess
++{
++    bool operator()(const Point& lhs, const Point& rhs) const
++    {
++        if (lhs.n_rows != rhs.n_rows)
++            return lhs.n_rows < rhs.n_rows;
++        if (lhs.n_cols != rhs.n_cols)
++            return lhs.n_cols < rhs.n_cols;
++
++        for (arma::uword col=0; col<lhs.n_cols; ++col)
++        {
++            for (arma::uword row=0; row<lhs.n_rows; ++row)
++            {
++                if (lhs(row, col) < rhs(row, col)) return true;
++                if (rhs(row, col) < lhs(row, col)) return false;
++            }
++        }
++        return false;
++    }
++};
++
+ 
+ typedef std::vector<Point> PointList;
+-typedef std::map<Point, int> PointMap;
++typedef std::map<Point, int, PointLess> PointMap;
+ 
+  
+  
+diff --git a/src/toolkit/openfoam/blockmesh.h b/src/toolkit/openfoam/blockmesh.h
+index 4f6e3fd..61e3304 100644
+--- a/src/toolkit/openfoam/blockmesh.h
++++ b/src/toolkit/openfoam/blockmesh.h
+@@ -79,7 +79,7 @@ protected:
+     boost::ptr_vector<Block> allEdges_;
+     PatchMap allPatches_;
+     std::vector<Geometry> geometries_;
+-    std::map<Point,std::string> projectedVertices_;
++    std::map<Point,std::string,PointLess> projectedVertices_;
+     std::vector<ProjectedFace> projectedFaces_;
+ 
+ public:
+diff --git a/src/toolkit/base/taskspoolerinterface.h b/src/toolkit/base/taskspoolerinterface.h
+index 5e8957e..7de0f41 100644
+--- a/src/toolkit/base/taskspoolerinterface.h
++++ b/src/toolkit/base/taskspoolerinterface.h
+@@ -4,7 +4,7 @@
+ #include <boost/filesystem.hpp>
+ #include "base/remoteserverlist.h"
+ #include "boost/process.hpp"
+-#include "boost/asio/io_service.hpp"
++#include "boost/asio/io_context.hpp"
+ 
+ 
+ namespace insight
+diff --git a/src/analyze/analyze.cpp b/src/analyze/analyze.cpp
+index 6182cc5..868c115 100644
+--- a/src/analyze/analyze.cpp
++++ b/src/analyze/analyze.cpp
+@@ -50,7 +50,7 @@
+ #include <boost/array.hpp>
+ #include <boost/asio.hpp>
+ #include <boost/bind.hpp>
+-#include "boost/asio/io_service.hpp"
++#include "boost/asio/io_context.hpp"
+ 
+ #ifdef HAVE_WT
+ #include "restapi.h"
+diff --git a/src/toolkit/base/boost_include.cpp b/src/toolkit/base/boost_include.cpp
+index 2dff878..5e6fa9a 100644
+--- a/src/toolkit/base/boost_include.cpp
++++ b/src/toolkit/base/boost_include.cpp
+@@ -49,6 +49,9 @@ make_relative(
+     }
+ 
+     // Now navigate down the directory branch
+-    ret.append( itrTo, a_To.end() );
++    for( ; itrTo != a_To.end() ; ++itrTo )
++    {
++        ret /= *itrTo;
++    }
+     return ret;
+ }
+diff --git a/src/toolkit/base/linuxremoteserver.h b/src/toolkit/base/linuxremoteserver.h
+index e74234d..0f59f10 100644
+--- a/src/toolkit/base/linuxremoteserver.h
++++ b/src/toolkit/base/linuxremoteserver.h
+@@ -2,7 +2,7 @@
+ #define INSIGHT_LINUXREMOTESERVER_H
+ 
+ #include "remoteserver.h"
+-#include "boost/process/detail/child_decl.hpp"
++#include "boost/process/child.hpp"
+ #include "boost/process/pipe.hpp"
+ #include <functional>
+ #include <memory>
+diff --git a/src/toolkit/base/taskspoolerinterface.h b/src/toolkit/base/taskspoolerinterface.h
+index 7de0f41..818f477 100644
+--- a/src/toolkit/base/taskspoolerinterface.h
++++ b/src/toolkit/base/taskspoolerinterface.h
+@@ -17,7 +17,7 @@ class TaskSpoolerInterface
+   boost::filesystem::path socket_;
+   boost::process::environment env_;
+ 
+-  std::shared_ptr<boost::asio::io_service> ios_;
++  std::shared_ptr<boost::asio::io_context> ios_;
+   std::shared_ptr<boost::process::async_pipe> tail_cout_;
+   std::shared_ptr<std::thread> ios_run_thread_;
+   std::shared_ptr<boost::process::child> tail_c_;
+diff --git a/src/toolkit/base/taskspoolerinterface.cpp b/src/toolkit/base/taskspoolerinterface.cpp
+index 482c5e7..1a75bf7 100644
+--- a/src/toolkit/base/taskspoolerinterface.cpp
++++ b/src/toolkit/base/taskspoolerinterface.cpp
+@@ -255,7 +255,7 @@ void TaskSpoolerInterface::startTail(std::function<void(const std::string&)> rec
+ 
+   receivers_.push_back(receiver);
+ 
+-  ios_.reset(new boost::asio::io_service());
++  ios_.reset(new boost::asio::io_context());
+   buf_cout_.reset(new boost::asio::streambuf());
+   tail_cout_.reset(new boost::process::async_pipe(*ios_));
+   try
+@@ -354,1 +354,1 @@ void TaskSpoolerInterface::stopTail()
+-    ios_->reset();
++    ios_->restart();
+diff --git a/src/toolkit/base/tools.cpp b/src/toolkit/base/tools.cpp
+index 8ef3333..3b61e17 100644
+--- a/src/toolkit/base/tools.cpp
++++ b/src/toolkit/base/tools.cpp
+@@ -1098,7 +1098,7 @@ int findFreePort()
+   using namespace boost::asio;
+   using ip::tcp;
+ 
+-  io_service svc;
++  io_context svc;
+   tcp::acceptor a(svc);
+ 
+   boost::system::error_code ec;
+diff --git a/src/toolkit/openfoam/blockmesh.cpp b/src/toolkit/openfoam/blockmesh.cpp
+index 1f1c15f..f884f12 100644
+--- a/src/toolkit/openfoam/blockmesh.cpp
++++ b/src/toolkit/openfoam/blockmesh.cpp
+@@ -273,6 +273,6 @@ OFDictData::dict blockMeshBlocking::create_bmd() const
+ 
+     int n_cells=0;
+     OFDictData::list bl;
+-    std::set<Point> blockCorners;
++    std::set<Point,PointLess> blockCorners;
+     for (const auto& b : allBlocks_)
+     {
+diff --git a/src/toolkit/base/vtkrendering.h b/src/toolkit/base/vtkrendering.h
+index d955313..7bc98af 100644
+--- a/src/toolkit/base/vtkrendering.h
++++ b/src/toolkit/base/vtkrendering.h
+@@ -510,1 +510,1 @@ public:
+-  vtkSmartPointer<vtkMultiBlockDataSetAlgorithm> extractBlocks(const std::set<int>& blockIdxs) const;
++  vtkSmartPointer<vtkAlgorithm> extractBlocks(const std::set<int>& blockIdxs) const;
+diff --git a/src/toolkit/base/vtkrendering.cpp b/src/toolkit/base/vtkrendering.cpp
+index cffb113..d38d076 100644
+--- a/src/toolkit/base/vtkrendering.cpp
++++ b/src/toolkit/base/vtkrendering.cpp
+@@ -1835,7 +1835,6 @@ OpenFOAMCaseScene::OpenFOAMCaseScene(const boost::filesystem::path& file, bool r
+   ofcase_->EnableAllLagrangianArrays();
+ 
+   ofcase_->CacheMeshOn();
+-  ofcase_->DecomposePolyhedraOn();
+   ofcase_->ListTimeStepsByControlDictOff();
+   if (readZones)
+   {
+@@ -2026,7 +2026,7 @@ vtkSmartPointer<vtkCompositeDataGeometryFilter> OpenFOAMCaseScene::extractBlock(
+   return extractBlock(std::set<int>({blockIdx}));
+ }
+ 
+-vtkSmartPointer<vtkMultiBlockDataSetAlgorithm> OpenFOAMCaseScene::extractBlocks(const std::set<int>& blockIdxs) const
++vtkSmartPointer<vtkAlgorithm> OpenFOAMCaseScene::extractBlocks(const std::set<int>& blockIdxs) const
+ {
+   insight::assertion(
+       blockIdxs.size()>0,
+@@ -2123,7 +2123,9 @@ void forEachUnconnectedPart(
+                 0, 0, 0,
+                 vtkDataObject::FIELD_ASSOCIATION_CELLS,
+                 "RegionId" );
+-            thr->ThresholdBetween(r, r);            
++            thr->SetThresholdFunction(vtkThreshold::THRESHOLD_BETWEEN);
++            thr->SetLowerThreshold(r);
++            thr->SetUpperThreshold(r);
+             thr->Update();
+ 
+             regions[r]=thr;
+diff --git a/src/cad/occtools.h b/src/cad/occtools.h
+index 9ac88d6..86dc48f 100644
+--- a/src/cad/occtools.h
++++ b/src/cad/occtools.h
+@@ -94,11 +94,11 @@ void transformTriangulation(
+ 
+                 for (int i=1; i<=tri->NbNodes(); ++i)
+                 {
+-                    auto xyz=tri->Nodes().Value(i).XYZ();
++                    auto xyz=tri->Node(i).XYZ();
+                     lotr.Transforms(xyz);
+                     tr.Transforms(xyz);
+                     ltr.Transforms(xyz);
+-                    tri->ChangeNodes().ChangeValue(i)=xyz;
++                    tri->SetNode(i, gp_Pnt(xyz));
+                 }
+ 
+                 aB.UpdateFace(ft, tri);
+diff --git a/src/cad/ivtkoccshape.cpp b/src/cad/ivtkoccshape.cpp
+index 235bd15..a3ffb92 100644
+--- a/src/cad/ivtkoccshape.cpp
++++ b/src/cad/ivtkoccshape.cpp
+@@ -113,11 +113,11 @@ vtkSmartPointer<vtkPolyData> vtkPolyDataFromShape
+ 
+               for (vtkIdType i=0; i<tri->NbNodes(); ++i)
+               {
+-                  points->InsertNextPoint( tri->Nodes().Value(i+1).Transformed(L).XYZ().GetData() );
++                  points->InsertNextPoint( tri->Node(i+1).Transformed(L).XYZ().GetData() );
+               }
+               for (vtkIdType j=0; j<tri->NbTriangles(); ++j)
+               {
+-                  auto t = tri->Triangles().Value(j+1);
++                  auto t = tri->Triangle(j+1);
+                   vtkIdType c[3]={
+                       t.Value(1)+i0-1,
+                       t.Value(2)+i0-1,
+diff --git a/src/cad/cadfeature.cpp b/src/cad/cadfeature.cpp
+index 698a797..6ca0b1d 100644
+--- a/src/cad/cadfeature.cpp
++++ b/src/cad/cadfeature.cpp
+@@ -2516,8 +2516,8 @@ Handle_Poly_Triangulation Feature::triangulation(double tol) const
+ 
+         for (int i=1; i<=mesh->NbNodes(); ++i)
+         {
+-            mesh->ChangeNodes().ChangeValue(i)=
+-                mesh->Nodes().Value(i).Transformed(loc);
++            mesh->SetNode(i,
++                mesh->Node(i).Transformed(loc));
+         }
+ 
+         triangulations.Append(mesh);
+diff --git a/src/cad/cadfeature.cpp b/src/cad/cadfeature.cpp
+--- a/src/cad/cadfeature.cpp
++++ b/src/cad/cadfeature.cpp
+@@ -1684,7 +1684,11 @@ void Feature::exportEMesh
+ {
+     if (fs.shape()!=Edge)
+         throw insight::Exception("Called with incompatible feature set!");
+ 
+-    std::map<arma::mat, int> points;
++    auto matLess = [](const arma::mat& a, const arma::mat& b)
++    {
++        return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
++    };
++    std::map<arma::mat, int, decltype(matLess)> points(matLess);
+     typedef std::pair<arma::mat, arma::mat> Edge;
+     std::vector<Edge> edges;
+ 
+@@ -1753,7 +1757,7 @@ void Feature::exportEMesh
+     std::for_each(
+         points.begin(), points.end(),
+-        [&]( const std::pair<arma::mat,int>& p )
++        [&]( const auto& p )
+         {
+             ptList[p.second]=p.first;
+         }
+diff --git a/src/cad/cadpostprocactions/framemesh.cpp b/src/cad/cadpostprocactions/framemesh.cpp
+index 0a7c4dd..91a7451 100644
+--- a/src/cad/cadpostprocactions/framemesh.cpp
++++ b/src/cad/cadpostprocactions/framemesh.cpp
+@@ -346,7 +346,7 @@ void applyLocation(Poly_Triangulation& pt, const TopLoc_Location& loc)
+ {
+     for (int i=1; i<=pt.NbNodes(); ++i)
+     {
+-        pt.ChangeNodes().ChangeValue(i)=pt.Nodes().Value(i).Transformed(loc);
++        pt.SetNode(i, pt.Node(i).Transformed(loc));
+     }
+ }
+ #endif
+diff --git a/src/cad/cadfeatures/faceisocurve.cpp b/src/cad/cadfeatures/faceisocurve.cpp
+--- a/src/cad/cadfeatures/faceisocurve.cpp
++++ b/src/cad/cadfeatures/faceisocurve.cpp
+@@ -8,7 +8,6 @@
+ 
+ #include "Adaptor3d_IsoCurve.hxx"
+ #include "GeomAPI_Interpolate.hxx"
+-#include "GeomAdaptor_HSurface.hxx"
+ 
+ 
+ namespace qi = boost::spirit::qi;
+@@ -70,7 +69,7 @@ void FaceIsoCurve::build()
+     TopoDS_Face aFace = faces_->model()->face(i_f);
+ 
+     BRepAdaptor_Surface bas(aFace, Standard_True);
+-    Handle_Adaptor3d_HSurface HS = new GeomAdaptor_HSurface( bas.Surface() );
++    Handle(Adaptor3d_Surface) HS = bas.ShallowCopy();
+     Adaptor3d_IsoCurve C( HS,  coord_==UV::U ? GeomAbs_IsoU : GeomAbs_IsoV, iso_value_->value() );
+ 
+     int ni=std::min(10, C.NbIntervals(GeomAbs_C1));
+diff --git a/src/cad/cadfeatures/pipe.cpp b/src/cad/cadfeatures/pipe.cpp
+--- a/src/cad/cadfeatures/pipe.cpp
++++ b/src/cad/cadfeatures/pipe.cpp
+@@ -17,7 +17,7 @@
+  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+  */
+ 
+-#include "BRepAdaptor_HCompCurve.hxx"
++#include "Adaptor3d_Curve.hxx"
+ #include "Approx_Curve3d.hxx"
+ #include "pipe.h"
+ #include "cadfeature.h"
+@@ -103,7 +103,7 @@ void Pipe::build()
+     if (reapprox_spine_)
+     {
+         BRepAdaptor_CompCurve wireAdaptor(spinew);
+-        Handle(BRepAdaptor_HCompCurve) curve = new BRepAdaptor_HCompCurve(wireAdaptor);
++        Handle(Adaptor3d_Curve) curve = wireAdaptor.ShallowCopy();
+         Approx_Curve3d approx2(curve, 0.001, GeomAbs_G1, 2000, 6);
+         if (approx2.IsDone() && approx2.HasResult())
+         {
+diff --git a/src/cad/cadfeatures/stl.cpp b/src/cad/cadfeatures/stl.cpp
+--- a/src/cad/cadfeatures/stl.cpp
++++ b/src/cad/cadfeatures/stl.cpp
+@@ -47,7 +47,6 @@
+ #include "Graphic3d_MaterialAspect.hxx"
+ #include "AIS_Triangulation.hxx"
+ #include "Poly.hxx"
+-#include "XSDRAWSTLVRML_DataSource.hxx"
+ #include "MeshVS_MeshPrsBuilder.hxx"
+ #include "MeshVS_ElementalColorPrsBuilder.hxx"
+ #include "MeshVS_Drawer.hxx"
+@@ -205,33 +204,23 @@
+       {
+         double xyz[3];
+         split_mesh->GetPoint(i, xyz);
+-        aSTLMesh_->
+-#if OCC_VERSION_MAJOR<7
+-            ChangeNodes().ChangeValue(i+1)
+-#else
+-            ChangeNode (i+1)
+-#endif
+-            = gp_Pnt(xyz[0], xyz[1], xyz[2]);
++        aSTLMesh_->SetNode(i+1, gp_Pnt(xyz[0], xyz[1], xyz[2]));
+       }
+ 
+       for (vtkIdType i = 0; i < split_mesh->GetNumberOfCells(); i++)
+       {
+         vtkCell *c = split_mesh->GetCell(i);
+         insight::assertion( c->GetNumberOfPoints()==3, _("STL mesh cell needs to have exactly 3 corners"));
+-        aSTLMesh_->
+-#if OCC_VERSION_MAJOR<7
+-            ChangeTriangles().ChangeValue(i+1)
+-#else
+-            ChangeTriangle(i+1)
+-#endif
+-
+-            =
++        aSTLMesh_->SetTriangle
++        (
++            i+1,
+             Poly_Triangle
+             (
+               c->GetPointId(0)+1,
+               c->GetPointId(1)+1,
+               c->GetPointId(2)+1
+-              );
++              )
++            );
+       }
+     }
+ 
+@@ -251,13 +240,9 @@
+ 
+       for (int i=1; i<=aSTLMesh_->NbNodes();i++)
+       {
+-        aSTLMesh_->
+-#if OCC_VERSION_MAJOR<7
+-            ChangeNodes().ChangeValue(i)
+-#else
+-            ChangeNode(i)
+-#endif
+-            .Transform(*tr);
++        gp_Pnt p = aSTLMesh_->Node(i);
++        p.Transform(*tr);
++        aSTLMesh_->SetNode(i, p);
+       }
+     }
+ 
+diff --git a/src/cad/geotest.cpp b/src/cad/geotest.cpp
+--- a/src/cad/geotest.cpp
++++ b/src/cad/geotest.cpp
+@@ -462,8 +462,7 @@ bool isPartOf(const TopoDS_Face& big, const TopoDS_Face& small, double toleranc
+             int delta = nbNodes / nSamples;
+             delta = std::max(delta, 1);
+             for (int i=1; i<tri->NbNodes(); i+=delta){
+-              const TColgp_Array1OfPnt& nodes = tri->Nodes();
+-              gp_XYZ p = nodes(i).Coord();
++              gp_XYZ p = tri->Node(i).Coord();
+               L.Transformation().Transforms(p);
+               ok = isPartOf(big, BRepBuilderAPI_MakeVertex(gp_Pnt(p)), tolerance);
+             }
+diff --git a/src/toolkit/CMakeLists.txt b/src/toolkit/CMakeLists.txt
+index 1e2e937..9914a15 100644
+--- a/src/toolkit/CMakeLists.txt
++++ b/src/toolkit/CMakeLists.txt
+@@ -375,14 +375,6 @@ target_compile_definitions(toolkit
+         BOOST_SPIRIT_USE_PHOENIX_V3
+ )
+ 
+-if(NOT WIN32)
+-    target_compile_definitions(toolkit
+-        PUBLIC
+-            BOOST_NO_SCOPED_ENUMS
+-            BOOST_NO_CXX11_SCOPED_ENUMS
+-    )
+-endif()
+-
+ target_link_libraries(toolkit PUBLIC ${Intl_LIBRARY})
+ target_link_libraries(toolkit PUBLIC ${ARMADILLO_LIBRARY})
+ target_link_libraries(toolkit PUBLIC PkgConfig::poppler-cpp)

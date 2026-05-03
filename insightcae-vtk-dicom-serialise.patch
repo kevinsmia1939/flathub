@@ -1,0 +1,10 @@
+--- a/CMake/vtkTargets/vtkOnscreen/CMakeLists.txt
++++ b/CMake/vtkTargets/vtkOnscreen/CMakeLists.txt
+@@ -243,6 +243,7 @@
+
+     add_library(vtkOnscreen INTERFACE)
+     add_dependencies(vtkOnscreen vtkdicom-onscreen)
++    add_dependencies(vtkdicom-offscreen vtkdicom-onscreen)
+     target_link_libraries(vtkOnscreen INTERFACE ${LIBS})
+
+ endif()

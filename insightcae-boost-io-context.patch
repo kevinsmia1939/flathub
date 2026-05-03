@@ -1,0 +1,52 @@
+--- a/src/toolkit/base/taskspoolerinterface.h
++++ b/src/toolkit/base/taskspoolerinterface.h
+@@ -4,7 +4,7 @@
+ #include <boost/filesystem.hpp>
+ #include "base/remoteserverlist.h"
+ #include "boost/process.hpp"
+-#include "boost/asio/io_context.hpp"
++#include "boost/asio/io_service.hpp"
+
+
+ namespace insight
+@@ -17,7 +17,7 @@
+   boost::filesystem::path socket_;
+   boost::process::environment env_;
+
+-  std::shared_ptr<boost::asio::io_context> ios_;
++  std::shared_ptr<boost::asio::io_service> ios_;
+   std::shared_ptr<boost::process::async_pipe> tail_cout_;
+   std::shared_ptr<std::thread> ios_run_thread_;
+   std::shared_ptr<boost::process::child> tail_c_;
+--- a/src/toolkit/base/taskspoolerinterface.cpp
++++ b/src/toolkit/base/taskspoolerinterface.cpp
+@@ -255,7 +255,7 @@
+
+   receivers_.push_back(receiver);
+
+-  ios_.reset(new boost::asio::io_context());
++  ios_.reset(new boost::asio::io_service());
+   buf_cout_.reset(new boost::asio::streambuf());
+   tail_cout_.reset(new boost::process::async_pipe(*ios_));
+   try
+--- a/src/toolkit/base/tools.cpp
++++ b/src/toolkit/base/tools.cpp
+@@ -1098,7 +1098,7 @@
+   using namespace boost::asio;
+   using ip::tcp;
+
+-  io_context svc;
++  io_service svc;
+   tcp::acceptor a(svc);
+
+   boost::system::error_code ec;
+--- a/src/analyze/analyze.cpp
++++ b/src/analyze/analyze.cpp
+@@ -50,7 +50,6 @@
+ #include <boost/array.hpp>
+ #include <boost/asio.hpp>
+ #include <boost/bind.hpp>
+-#include "boost/asio/io_context.hpp"
+
+ #ifdef HAVE_WT
+ #include "restapi.h"

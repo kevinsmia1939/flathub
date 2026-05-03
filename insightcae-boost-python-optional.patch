@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -228,7 +228,7 @@ if (INSIGHT_BUILD_TOOLKIT)
+         program_options
+         )
+-    if (PYTHONLIBS_FOUND)
++    if (PYTHONLIBS_FOUND AND INSIGHT_BUILD_PYTHONBINDINGS)
+         list(APPEND BOOST_COMPONENTS python3)
+     endif()
+

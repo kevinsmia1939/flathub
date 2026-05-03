@@ -1,0 +1,121 @@
+--- a/libs/python/src/converter/builtin_converters.cpp
++++ b/libs/python/src/converter/builtin_converters.cpp
+@@ -49,7 +49,7 @@
+ #else
+   void* convert_to_cstring(PyObject* obj)
+   {
+-      return PyUnicode_Check(obj) ? _PyUnicode_AsString(obj) : 0;
++      return PyUnicode_Check(obj) ? (void*)PyUnicode_AsUTF8(obj) : 0;
+   }
+ #endif
+
+--- a/boost/python/object/make_instance.hpp
++++ b/boost/python/object/make_instance.hpp
+@@ -48,7 +48,7 @@
+             Derived::construct(&instance->storage, (PyObject*)instance, x)->install(raw_result);
+
+             // Note the position of the internally-stored Holder,
+             // for the sake of destruction
+-            Py_SIZE(instance) = offsetof(instance_t, storage);
++            Py_SET_SIZE(instance, offsetof(instance_t, storage));
+
+             // Release ownership of the python object
+             protect.cancel();
+
+--- a/libs/python/src/object/enum.cpp
++++ b/libs/python/src/object/enum.cpp
+@@ -148,7 +148,7 @@
+       if (enum_type_object.tp_dict == 0)
+       {
+-          Py_TYPE(&enum_type_object) = incref(&PyType_Type);
++          Py_SET_TYPE(&enum_type_object, incref(&PyType_Type));
+ #if PY_VERSION_HEX >= 0x03000000
+           enum_type_object.tp_base = &PyLong_Type;
+ #else
+
+--- a/libs/python/src/exec.cpp
++++ b/libs/python/src/exec.cpp
+@@ -107,7 +107,7 @@
+   char *f = const_cast<char *>(filename);
+   // Let python open the file to avoid potential binary incompatibilities.
+ #if PY_VERSION_HEX >= 0x03040000
+-  FILE *fs = _Py_fopen(f, "r");
++  FILE *fs = fopen(f, "r");
+ #elif PY_VERSION_HEX >= 0x03000000
+   PyObject *fo = Py_BuildValue("s", f);
+   FILE *fs = _Py_fopen(fo, "r");
+
+--- a/libs/python/src/object/life_support.cpp
++++ b/libs/python/src/object/life_support.cpp
+@@ -93,7 +93,7 @@
+
+     if (Py_TYPE(&life_support_type) == 0)
+     {
+-        Py_TYPE(&life_support_type) = &PyType_Type;
++        Py_SET_TYPE(&life_support_type, &PyType_Type);
+         PyType_Ready(&life_support_type);
+     }
+
+--- a/libs/python/src/object/function.cpp
++++ b/libs/python/src/object/function.cpp
+@@ -107,7 +107,7 @@
+     PyObject* p = this;
+     if (Py_TYPE(&function_type) == 0)
+     {
+-        Py_TYPE(&function_type) = &PyType_Type;
++        Py_SET_TYPE(&function_type, &PyType_Type);
+         ::PyType_Ready(&function_type);
+     }
+
+--- a/libs/python/src/object/class.cpp
++++ b/libs/python/src/object/class.cpp
+@@ -208,7 +208,7 @@
+   {
+       if (static_data_object.tp_dict == 0)
+       {
+-          Py_TYPE(&static_data_object) = &PyType_Type;
++          Py_SET_TYPE(&static_data_object, &PyType_Type);
+           static_data_object.tp_base = &PyProperty_Type;
+           if (PyType_Ready(&static_data_object))
+               return 0;
+@@ -316,7 +316,7 @@
+   {
+       if (class_metatype_object.tp_dict == 0)
+       {
+-          Py_TYPE(&class_metatype_object) = &PyType_Type;
++          Py_SET_TYPE(&class_metatype_object, &PyType_Type);
+           class_metatype_object.tp_base = &PyType_Type;
+           if (PyType_Ready(&class_metatype_object))
+               return type_handle();
+@@ -374,12 +374,7 @@
+               // like, so we'll store the total size of the object
+               // there. A negative number indicates that the extra
+               // instance memory is not yet allocated to any holders.
+-#if PY_VERSION_HEX >= 0x02060000
+-              Py_SIZE(result) =
+-#else
+-              result->ob_size =
+-#endif
+-                  -(static_cast<int>(offsetof(instance<>,storage) + instance_size));
++Py_SET_SIZE(result, -(static_cast<int>(offsetof(instance<>,storage) + instance_size)));
+           }
+           return (PyObject*)result;
+       }
+@@ -470,7 +465,7 @@
+   {
+       if (class_type_object.tp_dict == 0)
+       {
+-          Py_TYPE(&class_type_object) = incref(class_metatype().get());
++          Py_SET_TYPE(&class_type_object, incref(class_metatype().get()));
+           class_type_object.tp_base = &PyBaseObject_Type;
+           if (PyType_Ready(&class_type_object))
+               return type_handle();
+@@ -739,7 +734,7 @@
+         assert(holder_offset >= offsetof(objects::instance<>,storage));
+
+         // Record the fact that the storage is occupied, noting where it starts
+-        Py_SIZE(self) = holder_offset;
++        Py_SET_SIZE(self, holder_offset);
+         return (char*)self + holder_offset;
+     }
+     else

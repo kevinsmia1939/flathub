@@ -1,0 +1,15 @@
+--- a/src/modules/generic/CMakeLists.txt
++++ b/src/modules/generic/CMakeLists.txt
+@@ -41,6 +41,8 @@
+ add_pybindings(GenericModules "genericmodules.i" genericmodules)
+
+-target_sources(GenericModules_python
+-  PRIVATE
+-    numericalwindtunnel_gui.h
+-)
++if (INSIGHT_BUILD_PYTHONBINDINGS)
++  target_sources(GenericModules_python
++    PRIVATE
++      numericalwindtunnel_gui.h
++  )
++endif()

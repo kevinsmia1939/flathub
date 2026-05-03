@@ -1,0 +1,21 @@
+--- a/tools/build/src/engine/build.sh
++++ b/tools/build/src/engine/build.sh
+@@ -150,6 +150,7 @@
+
+         *)
+         BOOST_JAM_CC=gcc
++        BOOST_JAM_OPT_JAM="$BOOST_JAM_OPT_JAM -Wno-implicit-function-declaration"
+         esac
+     ;;
+
+--- a/tools/build/src/engine/build.jam
++++ b/tools/build/src/engine/build.jam
+@@ -219,7 +219,7 @@
+     [ opt --release : [ opt --symbols : -g : -s ] -O3 ]
+     [ opt --debug : -g -O0 -fno-inline ]
+     [ opt --profile : -O3 -g -pg ]
+-    -I$(--python-include) -I$(--extra-include) -Wno-long-long
++    -I$(--python-include) -I$(--extra-include) -Wno-long-long -Wno-implicit-function-declaration
+     : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
+ ## GCC 2.x, 3.x on CYGWIN but without cygwin1.dll
+ toolset gcc-nocygwin gcc : "-o " : -D

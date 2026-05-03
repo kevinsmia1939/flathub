@@ -1,0 +1,13 @@
+--- a/src/IVtkDraw/IVtkDraw_Interactor.cxx
++++ b/src/IVtkDraw/IVtkDraw_Interactor.cxx
+@@ -27,6 +27,10 @@
+ #undef AllValues
+ #endif
+
++#ifdef Status
++#undef Status
++#endif
++
+ #include <vtkXRenderWindowInteractor.h>
+ #include <vtkXOpenGLRenderWindow.h>
+ #endif
