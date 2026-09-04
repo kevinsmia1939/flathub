@@ -30,10 +30,19 @@ modules:
       # checksum-pinned packages staged in nuget-sources.json
       - dotnet restore ui/DWSIM.UI.Desktop.Avalonia/DWSIM.UI.Desktop.Avalonia.csproj --runtime linux-x64 --configfile nuget-offline.config -p:NuGetAudit=false
       - dotnet restore extensions/DWSIM.Extensions.AI.Assistant/DWSIM.Extensions.AI.Assistant.vbproj --configfile nuget-offline.config -p:NuGetAudit=false
+      # Build DWSIM's headless MCP server as well as the desktop application so
+      # MCP clients can drive simulations through `flatpak run --command=dwsim-mcp`.
+      - dotnet restore tools/DWSIM.MCPServer/DWSIM.MCPServer.csproj --runtime linux-x64 --configfile nuget-offline.config -p:NuGetAudit=false
       - dotnet publish ui/DWSIM.UI.Desktop.Avalonia/DWSIM.UI.Desktop.Avalonia.csproj --configuration Release --runtime linux-x64 --self-contained true --no-restore -p:RestoreConfigFile=nuget-offline.config -p:NuGetAudit=false -p:PublishTrimmed=false -p:PublishSingleFile=false -p:ReaktoroRid=linux-x64 -p:CoolPropRid=linux-x64 --output publish
+      - dotnet publish tools/DWSIM.MCPServer/DWSIM.MCPServer.csproj --configuration Release --runtime linux-x64 --self-contained true --no-restore -p:RestoreConfigFile=nuget-offline.config -p:NuGetAudit=false -p:PublishTrimmed=false -p:PublishSingleFile=false -p:ReaktoroRid=linux-x64 -p:CoolPropRid=linux-x64 --output publish-mcp
       - install -d /app/lib/dwsim
       - cp -a publish/. /app/lib/dwsim/
+      - install -d /app/lib/dwsim-mcp
+      - cp -a publish-mcp/. /app/lib/dwsim-mcp/
       - install -Dm0755 dwsim-launcher /app/bin/dwsim
+      # This wrapper selects the MCP server's own library directory; keeping it
+      # separate avoids collisions with the desktop application's assemblies.
+      - install -Dm0755 dwsim-mcp-launcher /app/bin/dwsim-mcp
       - install -Dm0644 packaging/linux/dwsim.desktop /app/share/applications/org.dwsim.DWSIM.desktop
       - sed -i 's/^Icon=dwsim$/Icon=org.dwsim.DWSIM/' /app/share/applications/org.dwsim.DWSIM.desktop
       - sed -i 's/^Categories=Science;Engineering;Education;$/Categories=Science;Engineering;/' /app/share/applications/org.dwsim.DWSIM.desktop
@@ -53,6 +62,8 @@ modules:
       - nuget-sources.json
       - type: file
         path: dwsim-launcher
+      - type: file
+        path: dwsim-mcp-launcher
       - type: file
         path: org.dwsim.DWSIM.metainfo.xml
       - type: file
