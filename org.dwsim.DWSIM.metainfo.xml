@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.dwsim.DWSIM</id>
+  <name>DWSIM</name>
+  <summary>Open source chemical process simulator</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <description>
+    <p>DWSIM is a simulator for modeling, simulating, and optimizing steady-state and dynamic chemical processes.</p>
+  </description>
+  <launchable type="desktop-id">org.dwsim.DWSIM.desktop</launchable>
+  <url type="homepage">https://dwsim.org</url>
+  <url type="bugtracker">https://github.com/DanWBR/dwsim10/issues</url>
+  <developer id="org.dwsim"><name>Daniel Wagner Oliveira de Medeiros and contributors</name></developer>
+  <releases>
+    <release version="10.2.4" date="2026-08-31" />
+  </releases>
+  <categories>
+    <category>Science</category>
+    <category>Engineering</category>
+  </categories>
+  <content_rating type="oars-1.1" />
+</component>

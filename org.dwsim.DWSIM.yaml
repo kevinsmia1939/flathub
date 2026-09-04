@@ -1,0 +1,62 @@
+app-id: org.dwsim.DWSIM
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.dotnet10
+command: dwsim
+
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+  - --filesystem=home
+
+modules:
+  - name: dwsim
+    buildsystem: simple
+    build-options:
+      env:
+        DOTNET_ROOT: /usr/lib/sdk/dotnet10/lib
+        PATH: /usr/lib/sdk/dotnet10/bin:/usr/bin:/bin
+        NUGET_PACKAGES: /run/build/dwsim/nuget-cache
+        DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
+        DOTNET_NOLOGO: '1'
+    build-commands:
+      # nuget-offline.config replaces DWSIM's nuget.org source mapping with the
+      # checksum-pinned packages staged in nuget-sources.json. This keeps restore
+      # offline, as required by Flathub builders.
+      - dotnet restore ui/DWSIM.UI.Desktop.Avalonia/DWSIM.UI.Desktop.Avalonia.csproj --runtime linux-x64 --configfile nuget-offline.config -p:NuGetAudit=false
+      - dotnet restore extensions/DWSIM.Extensions.AI.Assistant/DWSIM.Extensions.AI.Assistant.vbproj --configfile nuget-offline.config -p:NuGetAudit=false
+      - dotnet publish ui/DWSIM.UI.Desktop.Avalonia/DWSIM.UI.Desktop.Avalonia.csproj --configuration Release --runtime linux-x64 --self-contained true --no-restore -p:RestoreConfigFile=nuget-offline.config -p:NuGetAudit=false -p:PublishTrimmed=false -p:PublishSingleFile=false -p:ReaktoroRid=linux-x64 -p:CoolPropRid=linux-x64 --output publish
+      - install -d /app/lib/dwsim
+      - cp -a publish/. /app/lib/dwsim/
+      # dwsim-launcher provides the stable /app/bin command expected by Flatpak
+      # and forwards file paths and other command-line arguments to the published app.
+      - install -Dm0755 dwsim-launcher /app/bin/dwsim
+      - install -Dm0644 packaging/linux/dwsim.desktop /app/share/applications/org.dwsim.DWSIM.desktop
+      - sed -i 's/^Icon=dwsim$/Icon=org.dwsim.DWSIM/' /app/share/applications/org.dwsim.DWSIM.desktop
+      - sed -i 's/^Categories=Science;Engineering;Education;$/Categories=Science;Engineering;/' /app/share/applications/org.dwsim.DWSIM.desktop
+      - install -Dm0644 packaging/linux/dwsim-mime.xml /app/share/mime/packages/org.dwsim.DWSIM.xml
+      - install -Dm0644 packaging/assets/dwsim-512.png /app/share/icons/hicolor/512x512/apps/org.dwsim.DWSIM.png
+      - install -Dm0644 org.dwsim.DWSIM.metainfo.xml /app/share/metainfo/org.dwsim.DWSIM.metainfo.xml
+      - install -Dm0644 LICENSE /app/share/licenses/org.dwsim.DWSIM/LICENSE
+    sources:
+      - type: git
+        url: https://github.com/DanWBR/dwsim10
+        tag: v10.2.4
+        commit: cad8b3484e5608db285d8a8cae2a83510b3fd44e
+      - type: archive
+        url: https://github.com/DanWBR/reaktoro/releases/download/runtimes-2.13.0/reaktoro-linux-x64.zip
+        sha256: e62ef5cbc0adf46523486cf9c53d574ebfa12f9735c389785568c8bca376eec1
+        dest: engine/DWSIM.Thermodynamics.ReaktoroPropertyPackage/native/runtimes-2.13.0/linux-x64
+      - nuget-sources.json
+      - type: file
+        path: dwsim-launcher
+      - type: file
+        path: org.dwsim.DWSIM.metainfo.xml
+      - type: file
+        path: nuget-offline.config
