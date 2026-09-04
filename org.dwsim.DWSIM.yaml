@@ -27,15 +27,12 @@ modules:
         DOTNET_NOLOGO: '1'
     build-commands:
       # nuget-offline.config replaces DWSIM's nuget.org source mapping with the
-      # checksum-pinned packages staged in nuget-sources.json. This keeps restore
-      # offline, as required by Flathub builders.
+      # checksum-pinned packages staged in nuget-sources.json
       - dotnet restore ui/DWSIM.UI.Desktop.Avalonia/DWSIM.UI.Desktop.Avalonia.csproj --runtime linux-x64 --configfile nuget-offline.config -p:NuGetAudit=false
       - dotnet restore extensions/DWSIM.Extensions.AI.Assistant/DWSIM.Extensions.AI.Assistant.vbproj --configfile nuget-offline.config -p:NuGetAudit=false
       - dotnet publish ui/DWSIM.UI.Desktop.Avalonia/DWSIM.UI.Desktop.Avalonia.csproj --configuration Release --runtime linux-x64 --self-contained true --no-restore -p:RestoreConfigFile=nuget-offline.config -p:NuGetAudit=false -p:PublishTrimmed=false -p:PublishSingleFile=false -p:ReaktoroRid=linux-x64 -p:CoolPropRid=linux-x64 --output publish
       - install -d /app/lib/dwsim
       - cp -a publish/. /app/lib/dwsim/
-      # dwsim-launcher provides the stable /app/bin command expected by Flatpak
-      # and forwards file paths and other command-line arguments to the published app.
       - install -Dm0755 dwsim-launcher /app/bin/dwsim
       - install -Dm0644 packaging/linux/dwsim.desktop /app/share/applications/org.dwsim.DWSIM.desktop
       - sed -i 's/^Icon=dwsim$/Icon=org.dwsim.DWSIM/' /app/share/applications/org.dwsim.DWSIM.desktop
