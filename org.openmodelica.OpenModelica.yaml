@@ -1,0 +1,271 @@
+app-id: org.openmodelica.OpenModelica
+runtime: org.kde.Sdk
+runtime-version: '6.11'
+base: io.qt.qtwebengine.BaseApp
+base-version: '6.11'
+sdk: org.kde.Sdk
+command: OMEdit
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk17
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio
+  - --filesystem=xdg-documents
+  - --filesystem=xdg-download
+  - --device=all
+  - --env=JAVA_HOME=/app/jre
+  - --env=LD_LIBRARY_PATH=/app/lib
+cleanup-commands:
+  - mv /app/include/omc /app/omc-include
+  - /app/cleanup-BaseApp.sh
+  - mkdir -p /app/include
+  - mv /app/omc-include /app/include/omc
+cleanup:
+  - /share/doc
+  - /share/man
+  - /etc
+  - '*.la'
+  - '*.a'
+
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk17/install.sh
+
+  - name: openblas
+    no-autogen: true
+    make-args:
+      - FC=gfortran
+      - NO_EXPRECISION=1
+      - NO_LAPACKE=1
+      - TARGET=GENERIC
+    make-install-args:
+      - PREFIX=/app
+    sources:
+      - type: archive
+        url: https://github.com/OpenMathLib/OpenBLAS/archive/refs/tags/v0.3.34.tar.gz
+        sha256: cd7e129868320cc2d033afa920e31202dfe0b8066a5b66661900ccc0f197dfed
+        x-checker-data:
+          type: anitya
+          project-id: 2540
+          stable-only: true
+          url-template: https://github.com/OpenMathLib/OpenBLAS/archive/refs/tags/v$version.tar.gz
+
+  - name: boost
+    buildsystem: simple
+    build-commands:
+      - ./bootstrap.sh --prefix=/app --with-libraries=atomic,chrono,filesystem,graph,log,program_options,serialization,thread
+      - ./b2 install link=shared runtime-link=shared cxxflags="-fPIC" -j $FLATPAK_BUILDER_N_JOBS
+    sources:
+      - type: archive
+        url: https://archives.boost.io/release/1.92.0/source/boost_1_92_0.tar.bz2
+        sha256: 5c1d40cb8e19adbf740a4ec2da35b3e58f3f5804b1dce44deb53df72193cbc6c
+        x-checker-data:
+          type: anitya
+          project-id: 6845
+          stable-only: true
+          url-template: https://archives.boost.io/release/$version/source/boost_${major}_${minor}_${patch}.tar.bz2
+
+  - name: opencl-headers
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_TESTING=OFF
+    sources:
+      - type: git
+        url: https://github.com/KhronosGroup/OpenCL-Headers.git
+        tag: v2026.05.29
+        commit: 6fe718c31a45fe25151362a72ef041c3a1047cbd
+        x-checker-data:
+          type: git
+          tag-pattern: ^v([\d.]+)$
+
+  - name: ffmpeg4
+    config-opts:
+      - --disable-static
+      - --enable-shared
+      - --disable-programs
+      - --disable-doc
+      - --disable-avdevice
+      - --disable-avfilter
+      - --disable-postproc
+      - --disable-encoders
+      - --disable-muxers
+      - --disable-protocols
+      - --disable-indevs
+      - --disable-devices
+      - --disable-filters
+    sources:
+      - type: archive
+        url: https://ffmpeg.org/releases/ffmpeg-4.4.8.tar.xz
+        sha256: c73848c4ae283d9eaee7be3b276affbc3543380483555500d0dd2c9b7e1c39c3
+        x-checker-data:
+          type: anitya
+          project-id: 5405
+          stable-only: true
+          url-template: https://ffmpeg.org/releases/ffmpeg-$version.tar.xz
+    cleanup:
+      - /share/ffmpeg
+
+  - name: openscenegraph
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+      - -DBUILD_OSG_APPLICATIONS=OFF
+      - -DBUILD_OSG_EXAMPLES=OFF
+      - -DOSG_AGGRESSIVE_WARNINGS=OFF
+    sources:
+      - type: git
+        url: https://github.com/openscenegraph/OpenSceneGraph
+        commit: a827840baf0786d72e11ac16d5338a4ee25779db
+        tag: OpenSceneGraph-3.6.5
+        x-checker-data:
+          type: git
+          tag-pattern: ^OpenSceneGraph-([\d.]+)$
+
+  - name: hdf5
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DBUILD_TESTING:BOOL=OFF
+      - -DHDF5_BUILD_EXAMPLES:BOOL=OFF
+    cleanup:
+      - /share/hdf5_examples
+      - /bin/*
+    sources:
+      - type: archive
+        url: https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5_1.14.6.tar.gz
+        sha256: 09ee1c671a87401a5201c06106650f62badeea5a3b3941e9b1e2e1e08317357f
+        x-checker-data:
+          type: anitya
+          project-id: 1303
+          stable-only: true
+          url-template: https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5_$version.tar.gz
+
+  - name: ncurses
+    config-opts:
+      - --with-shared
+      - --with-normal
+      - --without-debug
+      - --without-ada
+      - --enable-widec
+      - --disable-pc-files
+      - --with-cxx-binding
+      - --with-cxx-shared
+      - --with-versioned-syms
+      - --with-abi-version=5
+      - --with-termlib=tinfo
+    post-install:
+      - for lib in ncurses ncurses++ form panel menu; do ln -s lib${lib}w.so.5 /app/lib/lib${lib}.so.5;
+        done
+      - ln -s libncurses.so.5 /app/lib/libtic.so.5
+    sources:
+      - type: archive
+        url: https://ftp.gnu.org/gnu/ncurses/ncurses-6.6.tar.gz
+        sha256: 355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11
+        x-checker-data:
+          type: html
+          url: https://ftp.gnu.org/gnu/ncurses/
+          version-pattern: ncurses-([\d.]+)\.tar\.gz
+          url-template: https://ftp.gnu.org/gnu/ncurses/ncurses-$version.tar.gz
+
+  - name: omniorb
+    config-opts:
+      - --prefix=/app
+      - --disable-static
+    sources:
+      - type: archive
+        url: https://sourceforge.net/projects/omniorb/files/omniORB/omniORB-4.3.4/omniORB-4.3.4.tar.bz2/download
+        sha256: 79720d415d23cd8da99287a4ef4da0aa1bd34d3e4c7b1530715600adc5ed3dc3
+        dest-filename: omniORB-4.3.4.tar.bz2
+        x-checker-data:
+          type: anitya
+          project-id: 21545
+          stable-only: true
+          url-template: https://sourceforge.net/projects/omniorb/files/omniORB/omniORB-$version/omniORB-$version.tar.bz2/download
+
+  - name: openmpi
+    config-opts:
+      - --disable-static
+      - --with-libmpi-name=MPI
+    sources:
+      - type: archive
+        url: https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.10.tar.bz2
+        sha256: 0acecc4fc218e5debdbcb8a41d182c6b0f1d29393015ed763b2a91d5d7374cc6
+        x-checker-data:
+          type: anitya
+          project-id: 2554
+          stable-only: true
+          url-template: https://download.open-mpi.org/release/open-mpi/v${major}.${minor}/openmpi-$version.tar.bz2
+    cleanup:
+      - /bin
+
+  - name: openmodelica
+    buildsystem: cmake-ninja
+    builddir: true
+    build-options:
+      env:
+        LIBRARY_PATH: /app/lib:/usr/lib
+        LD_LIBRARY_PATH: /app/lib:/usr/lib
+        PATH: /app/bin:/usr/bin
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DJava_JAVA_EXECUTABLE=/app/jre/bin/java
+      - -DOM_USE_CCACHE=OFF
+      - -DOM_OMC_USE_CORBA=OFF
+    post-install:
+      - install -Dm644 ../OMEdit/OMEditLIB/Resources/icons/omedit.png ${FLATPAK_DEST}/share/icons/hicolor/256x256/apps/${FLATPAK_ID}.png
+      - install -Dm644 ../OMEdit/OMEditLIB/Resources/icons/omshell.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.OMShell.svg
+      - install -Dm644 ../OMNotebook/OMNotebook/OMNotebookGUI/Resources/OMNotebook_icon.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.OMNotebook.svg
+      - install -Dm644 ../${FLATPAK_ID}.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
+    sources:
+      - type: git
+        url: https://github.com/OpenModelica/OpenModelica
+        tag: v1.27.0
+        commit: 8b0c254729fe56af316a05aefde24e587fe9d693
+        disable-fsckobjects: true
+        x-checker-data:
+          type: git
+          tag-pattern: ^v([\d.]+)$
+          is-main-source: true
+      - type: patch
+        path: omedit-english-locale.patch
+      - type: file
+        path: org.openmodelica.OpenModelica.metainfo.xml
+
+  - name: openmodelica-desktop-files
+    buildsystem: simple
+    build-commands:
+      - install -Dm644 debian/desktops/omedit.desktop /app/share/applications/${FLATPAK_ID}.desktop
+      - install -Dm644 debian/desktops/omshell.desktop /app/share/applications/${FLATPAK_ID}.OMShell.desktop
+      - install -Dm644 debian/desktops/omshell-terminal.desktop /app/share/applications/${FLATPAK_ID}.OMShell-terminal.desktop
+      - install -Dm644 debian/desktops/omnotebook.desktop /app/share/applications/${FLATPAK_ID}.OMNotebook.desktop
+    sources:
+      - type: git
+        url: https://github.com/OpenModelica/OpenModelicaBuildScripts.git
+        branch: master
+        commit: 29ef89432ccc5beca8c3ec4221b231d8b27f931e
+      - type: patch
+        path: openmodelica-desktop-files.patch
+
+  - name: modelica-standard-library
+    buildsystem: simple
+    build-commands:
+      - install -Dm644 modelica-library-index.json /app/share/omlibrary/cache/index.json
+      - install -Dm644 7a4bf7de77a3986e8eb1e88cbb515d646f78f834.zip /app/share/omlibrary/cache/7a4bf7de77a3986e8eb1e88cbb515d646f78f834.zip
+    sources:
+      - type: file
+        path: modelica-library-index.json
+      - type: file
+        url: https://github.com/OpenModelica/OpenModelica-ModelicaStandardLibrary/archive/7a4bf7de77a3986e8eb1e88cbb515d646f78f834.zip
+        sha256: e1c9f6da69f089328917e6ec2b147f4dbf4730eec8683addfe727be40f6ba5e6
+
+  - name: runtime-support
+    buildsystem: simple
+    build-commands:
+      - ln -s libopenblas.so /app/lib/libblas.so
+      - ln -s libopenblas.so /app/lib/liblapack.so
+      - ln -s /usr/lib/${FLATPAK_ARCH}-linux-gnu/libz.so /app/lib/libzlib.so

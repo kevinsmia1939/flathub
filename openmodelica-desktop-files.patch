@@ -1,0 +1,78 @@
+diff --git a/debian/desktops/omedit.desktop b/debian/desktops/omedit.desktop
+index 127320f..d9275c6 100644
+--- a/debian/desktops/omedit.desktop
++++ b/debian/desktops/omedit.desktop
+@@ -1,14 +1,12 @@
+ [Desktop Entry]
+ Version=1.0
+-Encoding=UTF-8
+ Name=OMEdit
+ GenericName=Physical modeling and simulation tool
+ Comment=A Modelica connection editor
+-TryExec=OMEdit
+ Exec=OMEdit %f
+-Icon=/usr/share/pixmaps/omedit.png
++Icon=org.openmodelica.OpenModelica
+ Terminal=false
+ Type=Application
+ StartupNotify=true
+ Categories=Development;Education;Science;Math;
+ MimeType=text/x-onb;application/x-omnotebook;
+diff --git a/debian/desktops/omnotebook.desktop b/debian/desktops/omnotebook.desktop
+index 88cf4ee..53e6bd0 100644
+--- a/debian/desktops/omnotebook.desktop
++++ b/debian/desktops/omnotebook.desktop
+@@ -1,14 +1,12 @@
+ [Desktop Entry]
+ Version=1.0
+-Encoding=UTF-8
+ Name=OMNotebook
+ GenericName=Physical modeling and simulation tool
+ Comment=An open-source software tool for an electronic notebook supporting Modelica.
+-TryExec=OMNotebook
+ Exec=OMNotebook %f
+-Icon=/usr/share/pixmaps/OMNotebook_icon.svg
++Icon=org.openmodelica.OpenModelica.OMNotebook
+ Terminal=false
+ Type=Application
+ StartupNotify=true
+ Categories=Development;Education;Science;Math;
+ MimeType=text/x-onb;application/x-omnotebook;
+diff --git a/debian/desktops/omshell-terminal.desktop b/debian/desktops/omshell-terminal.desktop
+index 310f542..1a53b65 100644
+--- a/debian/desktops/omshell-terminal.desktop
++++ b/debian/desktops/omshell-terminal.desktop
+@@ -1,13 +1,11 @@
+ [Desktop Entry]
+ Version=1.0
+-Encoding=UTF-8
+ Name=OMShell-terminal
+ GenericName=Physical modeling and simulation tool
+ Comment=A complete Modelica modeling, compilation and simulation environment based on free software.
+-TryExec=OMShell-terminal
+ Exec=OMShell-terminal
+-Icon=/usr/share/pixmaps/omshell-terminal-large.svg
++Icon=org.openmodelica.OpenModelica.OMShell
+ Terminal=true
+ Type=Application
+ StartupNotify=true
+ Categories=Development;IDE;
+diff --git a/debian/desktops/omshell.desktop b/debian/desktops/omshell.desktop
+index 468d1cc..a171191 100644
+--- a/debian/desktops/omshell.desktop
++++ b/debian/desktops/omshell.desktop
+@@ -1,13 +1,11 @@
+ [Desktop Entry]
+ Version=1.0
+-Encoding=UTF-8
+ Name=OMShell
+ GenericName=Physical modeling and simulation tool
+ Comment=A complete Modelica modeling, compilation and simulation environment based on free software.
+-TryExec=OMShell
+ Exec=OMShell
+-Icon=/usr/share/pixmaps/omshell-large.svg
++Icon=org.openmodelica.OpenModelica.OMShell
+ Terminal=false
+ Type=Application
+ StartupNotify=true
+ Categories=Development;IDE;
